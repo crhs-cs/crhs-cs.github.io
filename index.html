@@ -162,6 +162,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
   border-top: 1px solid var(--line);
 }
 .section:first-child { border-top: 0; }
+.section-wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.section-wide .lede { margin-bottom: 8px; }
 .section h2 {
   font-family: var(--font-display);
   font-weight: 800;
@@ -181,7 +183,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
   background: #ffffff;
   max-width: 100%;
 }
-.calendar-frame iframe { display: block; width: 100%; height: 560px; border: 0; }
+.calendar-frame iframe { display: block; width: 100%; height: 680px; border: 0; }
 .calendar-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 16px; font-size: 0.95rem; }
 .calendar-links a { font-weight: 500; text-decoration: none; }
 .calendar-links a:hover { text-decoration: underline; }
@@ -221,7 +223,7 @@ footer {
   z-index: 2;
   background: var(--void);
   border-top: 1px solid var(--line);
-  padding-inline: var(--gutter);
+  padding-inline: max(var(--gutter), calc((100% - 1100px) / 2 + var(--gutter)));
   padding-block: 32px calc(32px + env(safe-area-inset-bottom, 0px));
   color: var(--dim);
   font-size: 0.9rem;
@@ -229,8 +231,6 @@ footer {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 12px;
-  max-width: 1100px;
-  margin: 0 auto;
 }
 
 @media (max-width: 720px) {
@@ -250,6 +250,13 @@ footer {
    sticky stage drift. Pin it to the screen instead; the content still slides over it. */
 @media (hover: none) and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
   .stage { position: fixed; top: 0; left: 0; right: 0; height: 100svh; }
+}
+
+/* Mouse/trackpad screens: a longer zoom that keeps moving until Meetings reaches the top,
+   so there's no stretch where content rises over a still black hole. Touch devices keep the default. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hero { height: 240vh; }
+  .content { margin-top: -100vh; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -290,7 +297,7 @@ footer {
   </section>
 
   <div class="content">
-    <section class="section" id="meetings">
+    <section class="section section-wide" id="meetings">
       <h2>Meetings</h2>
       <div class="section-body">
         <p class="lede">Every meeting is on the club calendar. Most weeks, one or two members present a project they've been working on.</p>
@@ -516,6 +523,7 @@ void main(){
   const cue = document.querySelector('.cue');
   const nav = document.querySelector('.nav');
   const meetings = document.getElementById('meetings');
+  const desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   const smooth = t => t * t * (3 - 2 * t);
   const clamp01 = x => Math.max(0, Math.min(1, x));
@@ -530,7 +538,7 @@ void main(){
 
   function updateText(s){
     if (reduce) return;
-    const o1 = 1 - clamp01((s - 0.1) / 0.3);
+    const o1 = desktop ? 1 - clamp01((s - 0.04) / 0.2) : 1 - clamp01((s - 0.1) / 0.3);
     [o1].forEach((o, i) => {
       beats[i].style.opacity = o.toFixed(3);
       beats[i].style.transform = `translateY(${((1 - o) * 24).toFixed(1)}px)`;
