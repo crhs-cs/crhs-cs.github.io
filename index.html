@@ -146,6 +146,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
 
 /* ---------- content ---------- */
 .content {
+  overflow-x: clip; /* keeps the full-width dividers from causing sideways scroll */
   position: relative;
   z-index: 2;
   background: linear-gradient(to bottom, rgba(7, 4, 13, 0) 0, var(--void) 22vh);
@@ -160,9 +161,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   gap: clamp(24px, 5vw, 72px);
+  position: relative;
+}
+/* Divider between sections runs the full screen width, not just the content column. */
+.section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
   border-top: 1px solid var(--line);
 }
-.section:first-child { border-top: 0; }
+.section:first-child::before { display: none; }
 .section-wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 .section-wide .lede { margin-bottom: 8px; }
 .section h2 {
