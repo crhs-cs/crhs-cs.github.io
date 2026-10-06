@@ -154,7 +154,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
 }
 .section {
   max-width: 68.75rem;
-  margin: 0 auto;
+  margin: 0; /* left-aligned to the same margin as the nav and hero title */
   padding-inline: var(--gutter);
   padding-block: clamp(56px, 10vw, 112px);
   display: grid;
@@ -224,7 +224,7 @@ footer {
   z-index: 2;
   background: var(--void);
   border-top: 1px solid var(--line);
-  padding-inline: max(var(--gutter), calc((100% - 68.75rem) / 2 + var(--gutter)));
+  padding-inline: var(--gutter);
   padding-block: 32px calc(32px + env(safe-area-inset-bottom, 0px));
   color: var(--dim);
   font-size: 0.9rem;
