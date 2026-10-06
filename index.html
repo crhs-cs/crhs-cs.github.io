@@ -262,6 +262,8 @@ footer {
    sticky stage drift. Pin it to the screen instead; the content still slides over it. */
 @media (hover: none) and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
   .stage { position: fixed; top: 0; left: 0; right: 0; height: 100svh; }
+  /* Size the black hole to the full screen height so the toolbar sliding in and out doesn't squish it. */
+  #sky { bottom: auto; height: 100vh; height: 100lvh; }
 }
 
 /* Tablets, laptops and larger screens: a longer zoom that keeps moving until Meetings reaches the top,
@@ -518,10 +520,17 @@ void main(){
   const quality = small ? 0.45 : 0.6;
   const steps = small ? 140 : 200;
 
+  const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  let lastW = 0;
   function resize(){
+    const cw = canvas.clientWidth, ch = canvas.clientHeight;
+    // On phones and tablets only a width change (rotation) should re-size the render;
+    // the address bar showing or hiding changes the height and would otherwise warp it.
+    if (touch && lastW && cw === lastW) return;
+    lastW = cw;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let w = Math.floor(window.innerWidth * dpr * quality);
-    let h = Math.floor(window.innerHeight * dpr * quality);
+    let w = Math.floor(cw * dpr * quality);
+    let h = Math.floor(ch * dpr * quality);
     const maxPx = 1.1e6;
     if (w * h > maxPx) { const k = Math.sqrt(maxPx / (w * h)); w = Math.floor(w * k); h = Math.floor(h * k); }
     canvas.width = w; canvas.height = h;
@@ -571,7 +580,7 @@ void main(){
     nav.classList.toggle('solid', meetings.getBoundingClientRect().top < nav.offsetHeight);
     if (!pastHero || reduce) {
       const e = smooth(s);
-      const wide = window.innerWidth / window.innerHeight;
+      const wide = canvas.width / canvas.height;
       gl.uniform2f(U.uRes, canvas.width, canvas.height);
       gl.uniform1f(U.uTime, reduce ? frozenTime : (now - start) / 1000);
       gl.uniform1f(U.uDist, 20.0 - 15.2 * e);
