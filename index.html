@@ -252,9 +252,9 @@ footer {
   .stage { position: fixed; top: 0; left: 0; right: 0; height: 100svh; }
 }
 
-/* Mouse/trackpad screens: a longer zoom that keeps moving until Meetings reaches the top,
-   so there's no stretch where content rises over a still black hole. Touch devices keep the default. */
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+/* Tablets, laptops and larger screens: a longer zoom that keeps moving until Meetings reaches the top,
+   so there's no stretch where content rises over a still black hole. Phones keep the default. */
+@media (min-width: 768px) and (min-height: 500px) and (prefers-reduced-motion: no-preference) {
   .hero { height: 240vh; }
   .content { margin-top: -100vh; }
 }
@@ -523,7 +523,9 @@ void main(){
   const cue = document.querySelector('.cue');
   const nav = document.querySelector('.nav');
   const meetings = document.getElementById('meetings');
-  const desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const wideQuery = window.matchMedia('(min-width: 768px) and (min-height: 500px)');
+  let desktop = wideQuery.matches;
+  wideQuery.addEventListener?.('change', e => { desktop = e.matches; });
 
   const smooth = t => t * t * (3 - 2 * t);
   const clamp01 = x => Math.max(0, Math.min(1, x));
