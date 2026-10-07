@@ -21,48 +21,54 @@
   // ---------- ASCII donut ----------
   // For each point on a torus: rotate it by angles A and B, project it, keep the nearest point
   // per character cell (a z-buffer), and pick a character by how much it faces the light.
+  // Same math as donut.c (R1 = 1, R2 = 2, K2 = 5).
   class Donut {
     init(g){
       this.g = g;
       const R = g.region, rw = R.x1 - R.x0, rh = R.y1 - R.y0;
-      // reduced quality uses bigger characters (fewer cells) instead of sparser sampling
+      // reduced quality uses bigger characters (fewer cells to fill)
       this.fs = g.narrow ? (g.level ? 12 : 10) : (g.level ? 15 : 13);
       this.cw = this.fs * 0.62; this.ch = this.fs * 1.05;
       this.cols = Math.floor(rw / this.cw); this.rows = Math.floor(rh / this.ch);
       this.ox = R.x0 + (rw - this.cols * this.cw) / 2; this.oy = R.y0 + (rh - this.rows * this.ch) / 2;
-      const size = Math.min(rw, rh) * 0.47;            // pixel radius the donut should fill
-      this.K2 = 5; this.K1 = size * this.K2 / 3 * 0.92;  // R1 + R2 = 3
+      const size = Math.min(rw, rh) * 0.47;            // pixel radius the donut should fill at mid depth
+      this.K2 = 5; this.K1 = size * this.K2 / 3 * 0.92;
       this.cx = R.x0 + rw / 2; this.cy = R.y0 + rh / 2;
-      // Space samples so neighbors land less than a cell apart, or empty cells show up as stripes.
-      // Around the tube (radius 1) a step moves about size/3 * dth pixels; around the ring (radius up to 3), size * dph.
-      this.dph = Math.min(0.04, 0.6 * this.cw / size);
-      this.dth = Math.min(0.12, 1.8 * this.cw / size);
+      // Sample spacing has to cover the NEAR side of the donut, where perspective magnifies it most
+      // (depth K2 - 3). Neighboring samples should land under two-thirds of a cell apart there, or cells get
+      // skipped and the back surface shows through with the wrong brightness.
+      const mag = this.K1 / (this.K2 - 3);
+      const step = 0.65 * Math.min(this.cw, this.ch);
+      const nPh = Math.ceil(2 * Math.PI * 3 * mag / step), nTh = Math.ceil(2 * Math.PI * 1 * mag / step);
+      this.cph = new Float32Array(nPh); this.sph = new Float32Array(nPh);
+      for (let k = 0; k < nPh; k++) { const a = 2 * Math.PI * k / nPh; this.cph[k] = Math.cos(a); this.sph[k] = Math.sin(a); }
+      this.cth = new Float32Array(nTh); this.sth = new Float32Array(nTh);
+      for (let k = 0; k < nTh; k++) { const a = 2 * Math.PI * k / nTh; this.cth[k] = Math.cos(a); this.sth[k] = Math.sin(a); }
       this.A = 1.0; this.B = 0.6;
       this.z = new Float32Array(this.cols * this.rows);
       this.lum = new Float32Array(this.cols * this.rows);
     }
     update(dt){ this.A += dt * 0.9; this.B += dt * 0.45; }
     render(){
-      const { cols, rows, z, lum, K1, K2, cw, ch, cx, cy, ox, oy } = this;
-      z.fill(0); lum.fill(-1);
+      const { cols, rows, z, lum, K1, K2, cw, ch, cx, cy, ox, oy, cph, sph, cth, sth } = this;
+      z.fill(0);
       const cA = Math.cos(this.A), sA = Math.sin(this.A), cB = Math.cos(this.B), sB = Math.sin(this.B);
-      const { dth, dph } = this;
-      for (let th = 0; th < 6.283; th += dth) {
-        const ct = Math.cos(th), st = Math.sin(th);
-        for (let ph = 0; ph < 6.283; ph += dph) {
-          const cp = Math.cos(ph), sp = Math.sin(ph);
-          const cx2 = 2 + ct;                            // R2 + R1 cos(theta), with R1 = 1, R2 = 2
-          const y1 = st;
+      const nTh = cth.length, nPh = cph.length;
+      for (let i = 0; i < nTh; i++) {
+        const ct = cth[i], st = sth[i];
+        const cx2 = 2 + ct, y1 = st;                     // R2 + R1 cos(theta), R1 sin(theta)
+        for (let j = 0; j < nPh; j++) {
+          const cp = cph[j], sp = sph[j];
           const x = cx2 * (cB * cp + sA * sB * sp) - y1 * cA * sB;
           const y = cx2 * (sB * cp - sA * cB * sp) + y1 * cA * cB;
-          const zz = K2 + cA * cx2 * sp + y1 * sA;
-          const ooz = 1 / zz;
-          const px = cx + K1 * ooz * x, py = cy - K1 * ooz * y;
-          const col = Math.floor((px - ox) / cw), row = Math.floor((py - oy) / ch);
+          const ooz = 1 / (K2 + cA * cx2 * sp + y1 * sA);
+          const col = Math.floor((cx + K1 * ooz * x - ox) / cw), row = Math.floor((cy - K1 * ooz * y - oy) / ch);
           if (col < 0 || row < 0 || col >= cols || row >= rows) continue;
-          const L = cp * ct * sB - cA * ct * sp - sA * st + cB * (cA * st - ct * sA * sp);
-          const i = row * cols + col;
-          if (ooz > z[i]) { z[i] = ooz; lum[i] = L; }
+          const c = row * cols + col;
+          if (ooz > z[c]) {
+            z[c] = ooz;
+            lum[c] = cp * ct * sB - cA * ct * sp - sA * st + cB * (cA * st - ct * sA * sp);
+          }
         }
       }
     }
@@ -71,11 +77,11 @@
       const chars = '.,-~:;=!*#$@';
       ctx.font = `500 ${this.fs}px ${MONO}`;
       ctx.textBaseline = 'top';
-      const { cols, rows, lum, cw, ch, ox, oy } = this;
+      const { cols, rows, z, lum, cw, ch, ox, oy } = this;
       for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-        const L = lum[r * cols + c];
-        if (L <= 0) continue;
-        const k = Math.min(11, Math.floor(L * 8));
+        const i = r * cols + c;
+        if (!z[i]) continue;                             // nothing here: leave it blank
+        const k = lum[i] > 0 ? Math.min(11, Math.floor(lum[i] * 8)) : 0;   // surfaces facing away still draw '.'
         ctx.fillStyle = k > 8 ? rgba('silver', 0.95) : rgba('lav', 0.3 + 0.65 * (k / 11));
         ctx.fillText(chars[k], ox + c * cw, oy + r * ch);
       }
