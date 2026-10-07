@@ -187,6 +187,14 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
 .section .lede { color: var(--dim); max-width: 60ch; margin: 0 0 28px; }
 .section-body { min-width: 0; }
 
+/* The calendar breaks out of the left-aligned column and centers on the screen, with breathing room on both sides. */
+.calendar-wrap {
+  width: 100vw;
+  margin-left: calc(-1 * var(--gutter));
+  padding-inline: max(var(--gutter), 6vw);
+  margin-top: 16px;
+}
+.calendar-inner { max-width: 64rem; margin-inline: auto; }
 .calendar-frame {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -315,12 +323,16 @@ footer {
       <h2>Meetings</h2>
       <div class="section-body">
         <p class="lede">Every meeting is on the club calendar. Most weeks, one or two members present a project they've been working on.</p>
+        <div class="calendar-wrap">
+        <div class="calendar-inner">
         <div class="calendar-frame">
           <iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=1&amp;ctz=America%2FChicago&amp;mode=AGENDA&amp;showTitle=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;color=%238E24AA" title="Cedar Ridge CS Club meeting calendar" loading="lazy"></iframe>
         </div>
         <div class="calendar-links">
           <a href="https://calendar.google.com/calendar/u/0?cid=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank" rel="noopener">Add to your Google Calendar</a>
           <a href="https://calendar.google.com/calendar/embed?src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;ctz=America%2FChicago" target="_blank" rel="noopener">Open full calendar</a>
+        </div>
+        </div>
         </div>
       </div>
     </section>
