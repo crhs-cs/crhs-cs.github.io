@@ -199,7 +199,9 @@ void main(){
 
     const pastHero = window.scrollY > hero.offsetHeight + window.innerHeight * 0.5;
     if (!pastHero || reduce) {
-      const e = smooth(s);
+      // Larger screens: finish the dive by 60% of the intro, so you're inside the black hole
+      // before Meetings rises into view. Phones keep the original pacing.
+      const e = smooth(desktop ? clamp01(s / 0.6) : s);
       const wide = canvas.width / canvas.height;
       gl.uniform2f(U.uRes, canvas.width, canvas.height);
       gl.uniform1f(U.uTime, reduce ? frozenTime : (now - start) / 1000);
