@@ -189,6 +189,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
 
 /* The calendar breaks out of the left-aligned column and centers on the screen, with breathing room on both sides. */
 .calendar-wrap {
+  box-sizing: border-box; /* padding sits inside the 100vw, so the calendar centers on the screen */
   width: 100vw;
   margin-left: calc(-1 * var(--gutter));
   padding-inline: max(var(--gutter), 6vw);
