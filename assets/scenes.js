@@ -25,13 +25,18 @@
     init(g){
       this.g = g;
       const R = g.region, rw = R.x1 - R.x0, rh = R.y1 - R.y0;
-      this.fs = g.narrow ? 10 : 13;
+      // reduced quality uses bigger characters (fewer cells) instead of sparser sampling
+      this.fs = g.narrow ? (g.level ? 12 : 10) : (g.level ? 15 : 13);
       this.cw = this.fs * 0.62; this.ch = this.fs * 1.05;
       this.cols = Math.floor(rw / this.cw); this.rows = Math.floor(rh / this.ch);
       this.ox = R.x0 + (rw - this.cols * this.cw) / 2; this.oy = R.y0 + (rh - this.rows * this.ch) / 2;
       const size = Math.min(rw, rh) * 0.47;            // pixel radius the donut should fill
       this.K2 = 5; this.K1 = size * this.K2 / 3 * 0.92;  // R1 + R2 = 3
       this.cx = R.x0 + rw / 2; this.cy = R.y0 + rh / 2;
+      // Space samples so neighbors land less than a cell apart, or empty cells show up as stripes.
+      // Around the tube (radius 1) a step moves about size/3 * dth pixels; around the ring (radius up to 3), size * dph.
+      this.dph = Math.min(0.04, 0.6 * this.cw / size);
+      this.dth = Math.min(0.12, 1.8 * this.cw / size);
       this.A = 1.0; this.B = 0.6;
       this.z = new Float32Array(this.cols * this.rows);
       this.lum = new Float32Array(this.cols * this.rows);
@@ -41,7 +46,7 @@
       const { cols, rows, z, lum, K1, K2, cw, ch, cx, cy, ox, oy } = this;
       z.fill(0); lum.fill(-1);
       const cA = Math.cos(this.A), sA = Math.sin(this.A), cB = Math.cos(this.B), sB = Math.sin(this.B);
-      const dth = this.g.level ? 0.11 : 0.08, dph = this.g.level ? 0.035 : 0.025;
+      const { dth, dph } = this;
       for (let th = 0; th < 6.283; th += dth) {
         const ct = Math.cos(th), st = Math.sin(th);
         for (let ph = 0; ph < 6.283; ph += dph) {
