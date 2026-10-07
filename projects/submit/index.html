@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="How to add a project you presented to the Cedar Ridge CS Club site.">
+<meta name="theme-color" content="#07040d">
+<title>Add Your Project | Cedar Ridge CS Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/site.css?v=202610071720">
+</head>
+<body class="page">
+<nav class="nav solid" aria-label="Main">
+  <a class="wordmark" href="/">CRHS CS</a>
+  <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
+  <ul id="nav-links">
+    <li><a href="/projects/" aria-current="page">Projects</a></li>
+    <li><a href="/presentations/">Presentations</a></li>
+    <li><a href="/resources/">Resources</a></li>
+    <li><a href="/opportunities/">Opportunities</a></li>
+    <li><a href="/#join">Join</a></li>
+  </ul>
+</nav>
+
+<main>
+  <header class="page-head project-head">
+    <a class="back" href="/projects/">All projects</a>
+    <h1>Add your project</h1>
+    <p class="lede">Presented something at a meeting? Put it on the site. An officer checks each one before it shows up.</p>
+  </header>
+  <div class="content">
+    <div class="page-body submit-body">
+      <section class="group">
+        <h2>Use the form</h2>
+        <p>The easiest way. Fill in your project's name, a short description, a screenshot and any links. No GitHub account or code needed.</p>
+        <p data-form-ready hidden><a class="button" data-form-link href="#" target="_blank" rel="noopener">Open the submission form</a></p>
+        <p class="note" data-form-missing>The form isn't set up yet. For now, send your project details to an officer.</p>
+      </section>
+      <section class="group">
+        <h2>Or open a pull request</h2>
+        <p>Want Git practice? Add your project to the site's code yourself, and an officer reviews and merges it.</p>
+        <ol class="steps">
+          <li>Open <a href="https://github.com/crhs-cs/crhs-cs.github.io/blob/main/data/projects.js?v=202610071720" target="_blank" rel="noopener">data/projects.js</a> on GitHub and click the pencil icon. GitHub makes you a copy (a fork) automatically.</li>
+          <li>Copy one of the project blocks, paste it at the top of the list, and fill it in. The comments at the top of the file explain each field.</li>
+          <li>For a screenshot, upload a PNG or JPG to the <code>images/projects</code> folder in your fork and set <code>image</code> to its path, like <code>"/images/projects/my-project.png"</code>.</li>
+          <li>Click <b>Commit changes</b>, then <b>Create pull request</b>. An officer reviews it, and once it's merged your project is live within a couple of minutes.</li>
+        </ol>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>Cedar Ridge High School Computer Science Club</span>
+  <a href="https://github.com/crhs-cs/crhs-cs.github.io" target="_blank" rel="noopener">Source on GitHub</a>
+</footer>
+
+<script src="/data/config.js?v=202610071720"></script>
+<script>
+(() => {
+  const url = (window.CLUB_CONFIG || {}).projectsFormURL || '';
+  if (!/^https:\/\//.test(url)) return;
+  document.querySelector('[data-form-link]').href = url;
+  document.querySelector('[data-form-ready]').hidden = false;
+  document.querySelector('[data-form-missing]').hidden = true;
+})();
+</script>
+<script src="/assets/site.js?v=202610071720"></script>
+</body>
+</html>

@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Projects Cedar Ridge CS Club members have presented at meetings.">
+<meta name="description" content="A project presented at the Cedar Ridge CS Club.">
 <meta name="theme-color" content="#07040d">
-<title>Projects | Cedar Ridge CS Club</title>
+<title>Project | Cedar Ridge CS Club</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap">
@@ -24,20 +24,8 @@
   </ul>
 </nav>
 
-<main>
-  <header class="page-head scene">
-    <canvas data-scene="projects" aria-hidden="true"></canvas>
-    <h1>Projects</h1>
-    <p class="lede">Every project a member has presented at a meeting, newest first. Presented something? <a href="/projects/submit/">Add your project</a>.</p>
-  </header>
-  <div class="content">
-    <div class="page-body">
-      <div>
-        <p class="note" data-projects-sample-note hidden>Sample entries until real projects are added.</p>
-        <div data-projects-grid></div>
-      </div>
-    </div>
-  </div>
+<main data-project-view>
+  <div class="page-head project-head"><p class="lede">Loading project...</p></div>
 </main>
 
 <footer>
@@ -49,6 +37,5 @@
 <script src="/data/config.js?v=202610071720"></script>
 <script src="/assets/projects.js?v=202610071720"></script>
 <script src="/assets/site.js?v=202610071720"></script>
-<script src="/assets/scenes.js?v=202610071720"></script>
 </body>
 </html>
