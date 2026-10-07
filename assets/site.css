@@ -220,6 +220,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
   text-wrap: balance;
 }
 .page-head .lede { margin: 0; }
+/* tablets and up: a slightly bigger title (phones keep the size above so long words fit) */
+@media (min-width: 761px) { .page-head h1 { font-size: clamp(2.5rem, 10vw, 7.5rem); } }
 .page-body {
   max-width: var(--column);
   padding-inline: var(--gutter);
@@ -391,7 +393,9 @@ footer a:hover { color: var(--lavender); }
 /* ---------- subpage header scenes ---------- */
 /* Scene header: a live canvas fills the header behind the title. */
 .page-head.scene {
-  overflow: hidden; /* same size as a plain page header; the scene fills it */
+  overflow: hidden;
+  /* a little taller than a plain header, so the scene behind it has more room */
+  padding-block: calc(env(safe-area-inset-top, 0px) + 10.5rem) clamp(56px, 8.5vw, 112px);
   background: var(--void);
   isolation: isolate;
 }
