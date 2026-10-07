@@ -3,305 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="The Cedar Ridge High School Computer Science Club: meetings, member projects, and past presentations.">
+<meta name="description" content="The Cedar Ridge High School Computer Science Club: meetings, member projects, presentations, and resources.">
 <meta name="theme-color" content="#07040d">
 <title>Cedar Ridge CS Club</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap">
-<style>
-/* Layout: a live black hole fills the screen; scrolling pulls the camera toward it while the hero
-   title fades, then the club's content rises over it on solid void. */
-:root {
-  --void: #07040d;        /* deep purple-black, the page ground */
-  --void-raised: #110a1d; /* panels and rows */
-  --purple: #8b55e8;      /* school purple, buttons and links */
-  --lavender: #cdb4ff;    /* hover, highlights */
-  --silver: #d9d6e0;      /* school silver, headings */
-  --dim: #8f889c;         /* secondary text, rules */
-  --line: rgba(217, 214, 224, 0.16);
-
-  --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
-  --font-body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
-
-  --step-0: 1rem;
-  --step-1: 1.25rem;
-  --step-2: 1.75rem;
-  --step-3: clamp(2rem, 4.5vw, 3.25rem);
-  --step-4: clamp(3.4rem, 11vw, 9.5rem);
-
-  --gutter: clamp(16px, 4vw, 3rem);
-  color-scheme: dark;
-}
-
-/* Type and layout grow together on large screens: 16px up to ~1270px wide, rising to 22px at ~2560px. */
-html { background: var(--void); scroll-behavior: smooth; font-size: clamp(16px, 0.47vw + 10px, 22px); }
-body {
-  background: var(--void);
-  color: var(--silver);
-  font-family: var(--font-body);
-  font-size: var(--step-0);
-  line-height: 1.6;
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-}
-
-a { color: var(--lavender); }
-a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outline-offset: 3px; border-radius: 2px; }
-
-/* ---------- background canvas ---------- */
-#sky {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  z-index: 0;
-  background: radial-gradient(ellipse 60% 30% at 62% 52%, #4a2391 0%, #1a0d33 45%, var(--void) 75%);
-}
-
-/* ---------- nav ---------- */
-.nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: calc(env(safe-area-inset-top, 0px) + 18px) var(--gutter) 18px;
-  background: linear-gradient(to bottom, rgba(7, 4, 13, 0.75), rgba(7, 4, 13, 0));
-}
-.wordmark {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.35rem;
-  letter-spacing: 0.02em;
-  color: var(--silver);
-  text-decoration: none;
-}
-.nav ul { display: flex; gap: clamp(14px, 2.5vw, 32px); list-style: none; margin: 0; padding: 0; flex-wrap: wrap; justify-content: flex-end; }
-.nav a { color: var(--silver); text-decoration: none; font-size: 0.95rem; font-weight: 500; opacity: 0.85; }
-.nav a:hover { opacity: 1; color: var(--lavender); }
-.nav { transition: background 0.3s; }
-.nav.solid { background: rgba(7, 4, 13, 0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-
-/* ---------- hero (scroll story) ---------- */
-.hero { position: relative; z-index: 1; height: 190vh; }
-.stage {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100svh;
-  overflow: hidden;
-  padding-inline: var(--gutter);
-}
-.beat {
-  position: absolute;
-  left: var(--gutter);
-  right: var(--gutter);
-  bottom: clamp(48px, 12vh, 120px);
-  max-width: 68.75rem;
-  will-change: opacity, transform;
-}
-.beat-1 { opacity: 1; }
-
-.title {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: var(--step-4);
-  line-height: 0.86;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
-  margin: 0;
-  color: var(--silver);
-  text-wrap: balance;
-  text-shadow: 0 2px 40px rgba(7, 4, 13, 0.6);
-}
-.title .line { display: block; }
-.title .small { font-size: 0.42em; letter-spacing: 0.04em; font-weight: 600; color: var(--lavender); margin-bottom: 0.15em; }
-
-.statement {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--step-3);
-  line-height: 1.05;
-  max-width: 16ch;
-  margin: 0;
-  text-wrap: balance;
-  text-shadow: 0 2px 30px rgba(7, 4, 13, 0.8);
-}
-
-.cue {
-  position: absolute;
-  right: var(--gutter);
-  bottom: clamp(48px, 12vh, 120px);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.85rem;
-  color: var(--dim);
-}
-.cue::after { content: ""; width: 1px; height: 48px; background: linear-gradient(var(--dim), transparent); }
-
-/* ---------- content ---------- */
-.content {
-  overflow-x: clip; /* keeps the full-width dividers from causing sideways scroll */
-  position: relative;
-  z-index: 2;
-  background: linear-gradient(to bottom, rgba(7, 4, 13, 0) 0, var(--void) 22vh);
-  margin-top: -55vh;
-  padding-top: 12vh;
-}
-.section {
-  max-width: 68.75rem;
-  margin: 0; /* left-aligned to the same margin as the nav and hero title */
-  padding-inline: var(--gutter);
-  padding-block: clamp(56px, 10vw, 112px);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: clamp(24px, 5vw, 72px);
-  position: relative;
-}
-/* Divider between sections runs the full screen width, not just the content column. */
-.section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  border-top: 1px solid var(--line);
-}
-.section:first-child::before { display: none; }
-.section-wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-.section-wide .lede { margin-bottom: 8px; }
-.section h2 {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: var(--step-3);
-  line-height: 1;
-  margin: 0;
-  text-transform: uppercase;
-  color: var(--silver);
-}
-.section .lede { color: var(--dim); max-width: 60ch; margin: 0 0 28px; }
-.section-body { min-width: 0; }
-
-/* The calendar breaks out of the left-aligned column and centers on the screen, with breathing room on both sides. */
-.calendar-wrap {
-  box-sizing: border-box; /* padding sits inside the 100vw, so the calendar centers on the screen */
-  width: 100vw;
-  margin-left: calc(-1 * var(--gutter));
-  padding-inline: max(var(--gutter), 6vw);
-  margin-top: 16px;
-}
-.calendar-inner { max-width: 64rem; margin-inline: auto; }
-.calendar-frame {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
-  background: #1a1a1a;
-  max-width: 100%;
-}
-/* Google's embed has no dark mode: invert it, then rotate hues back so event colors stay purple. */
-.calendar-frame iframe { display: block; width: 100%; height: 42.5rem; border: 0; filter: invert(0.9) hue-rotate(180deg) saturate(1.1); }
-.calendar-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 16px; font-size: 0.95rem; }
-.calendar-links a { font-weight: 500; text-decoration: none; }
-.calendar-links a:hover { text-decoration: underline; }
-@media (max-width: 720px) { .calendar-frame iframe { height: 480px; } }
-
-.note { font-size: 0.85rem; color: var(--dim); margin: 0 0 12px; }
-
-.rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-.rows li {
-  display: grid;
-  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) auto;
-  gap: 16px;
-  align-items: baseline;
-  padding-block: 18px;
-  border-bottom: 1px solid var(--line);
-}
-.rows .what { font-weight: 600; font-size: var(--step-1); color: var(--silver); }
-.rows .what span { display: block; font-weight: 400; font-size: 0.95rem; color: var(--dim); margin-top: 2px; }
-.rows .when { color: var(--dim); font-variant-numeric: tabular-nums; font-size: 0.95rem; }
-.rows a { font-weight: 500; text-decoration: none; }
-.rows a:hover { text-decoration: underline; }
-
-.button {
-  display: inline-block;
-  background: var(--purple);
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  padding: 14px 24px;
-  border-radius: 999px;
-  transition: background 0.2s;
-}
-.button:hover { background: #9d6cf0; }
-
-footer {
-  position: relative;
-  z-index: 2;
-  background: var(--void);
-  border-top: 1px solid var(--line);
-  padding-inline: var(--gutter);
-  padding-block: 32px calc(32px + env(safe-area-inset-bottom, 0px));
-  color: var(--dim);
-  font-size: 0.9rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-@media (max-width: 720px) {
-  .section { grid-template-columns: minmax(0, 1fr); }
-  .rows li { grid-template-columns: minmax(0, 1fr) auto; }
-  .rows .when { grid-column: 1; grid-row: 2; }
-  .rows a { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
-  .nav ul { gap: 12px; }
-  .nav a { font-size: 0.85rem; }
-  .cue { display: none; }
-}
-@media (max-width: 420px) {
-  .nav li:nth-child(3) { display: none; }
-}
-
-/* Touch devices: mobile browsers resize the viewport as the address bar hides, which makes a
-   sticky stage drift. Pin it to the screen instead; the content still slides over it. */
-@media (hover: none) and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
-  .stage { position: fixed; top: 0; left: 0; right: 0; height: 100svh; }
-  /* Size the black hole to the full screen height so the toolbar sliding in and out doesn't squish it. */
-  #sky { bottom: auto; height: 100vh; height: 100lvh; }
-}
-
-/* Tablets, laptops and larger screens: a longer zoom that keeps moving until Meetings reaches the top,
-   so there's no stretch where content rises over a still black hole. Phones keep the default. */
-@media (min-width: 768px) and (min-height: 500px) and (prefers-reduced-motion: no-preference) {
-  .hero { height: 240vh; }
-  .content { margin-top: -100vh; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .hero { height: auto; }
-  .content { margin-top: 0; }
-  .stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end; gap: 32px; padding-block: 120px 64px; }
-  .beat { position: static; opacity: 1 !important; transform: none !important; }
-  .cue { display: none; }
-}
-</style>
+<link rel="stylesheet" href="/assets/site.css">
 </head>
-<body>
+<body class="home">
 <canvas id="sky" aria-hidden="true"></canvas>
 
 <nav class="nav" aria-label="Main">
-  <a class="wordmark" href="#top">CRHS CS</a>
-  <ul>
-    <li><a href="#meetings">Meetings</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#presentations">Presentations</a></li>
-    <li><a href="#join">Join</a></li>
+  <a class="wordmark" href="/">CRHS CS</a>
+  <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
+  <ul id="nav-links">
+    <li><a href="/projects/">Projects</a></li>
+    <li><a href="/presentations/">Presentations</a></li>
+    <li><a href="/resources/">Resources</a></li>
+    <li><a href="/opportunities/">Opportunities</a></li>
+    <li><a href="/#join">Join</a></li>
   </ul>
 </nav>
 
@@ -325,15 +46,15 @@ footer {
       <div class="section-body">
         <p class="lede">Every meeting is on the club calendar. Most weeks, one or two members present a project they've been working on.</p>
         <div class="calendar-wrap">
-        <div class="calendar-inner">
-        <div class="calendar-frame">
-          <iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=1&amp;ctz=America%2FChicago&amp;mode=AGENDA&amp;showTitle=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;color=%238E24AA" title="Cedar Ridge CS Club meeting calendar" loading="lazy"></iframe>
-        </div>
-        <div class="calendar-links">
-          <a href="https://calendar.google.com/calendar/u/0?cid=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank" rel="noopener">Add to your Google Calendar</a>
-          <a href="https://calendar.google.com/calendar/embed?src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;ctz=America%2FChicago" target="_blank" rel="noopener">Open full calendar</a>
-        </div>
-        </div>
+          <div class="calendar-inner">
+            <div class="calendar-frame">
+              <iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=1&amp;ctz=America%2FChicago&amp;mode=AGENDA&amp;showTitle=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;color=%238E24AA" title="Cedar Ridge CS Club meeting calendar" loading="lazy"></iframe>
+            </div>
+            <div class="calendar-links">
+              <a href="https://calendar.google.com/calendar/u/0?cid=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank" rel="noopener">Add to your Google Calendar</a>
+              <a href="https://calendar.google.com/calendar/embed?src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;ctz=America%2FChicago" target="_blank" rel="noopener">Open full calendar</a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -341,45 +62,35 @@ footer {
     <section class="section" id="projects">
       <h2>Projects</h2>
       <div class="section-body">
-        <p class="note">Sample rows to show the layout. Real projects get added after each demo.</p>
-        <ul class="rows">
-          <li>
-            <div class="what">Pathfinding visualizer<span>A* and Dijkstra racing on the same grid</span></div>
-            <div class="when">Sample</div>
-            <a href="#projects">Code</a>
-          </li>
-          <li>
-            <div class="what">Homework reminder bot<span>A Discord bot that pings before deadlines</span></div>
-            <div class="when">Sample</div>
-            <a href="#projects">Code</a>
-          </li>
-          <li>
-            <div class="what">Wordle solver<span>Picks guesses by expected information</span></div>
-            <div class="when">Sample</div>
-            <a href="#projects">Code</a>
-          </li>
-        </ul>
+        <p class="lede">The latest projects members have demoed at meetings.</p>
+        <p class="note" data-sample-note="CLUB_PROJECTS" hidden>Sample entries until real projects are added.</p>
+        <div data-list="projects" data-limit="3"></div>
+        <a class="see-all" href="/projects/">See all projects</a>
       </div>
     </section>
 
     <section class="section" id="presentations">
       <h2>Presentations</h2>
       <div class="section-body">
-        <p class="lede">Slides from past meetings, so you can catch up on anything you missed.</p>
-        <ul class="rows">
-          <li>
-            <div class="what">Intro meeting<span>What the club is and how demos work</span></div>
-            <div class="when">Sample</div>
-            <a href="#presentations">Slides</a>
-          </li>
-        </ul>
+        <p class="lede">Slides from recent meetings, so you can catch up on anything you missed.</p>
+        <p class="note" data-sample-note="CLUB_PRESENTATIONS" hidden>Sample entry until real slides are added.</p>
+        <div data-list="presentations" data-limit="3"></div>
+        <a class="see-all" href="/presentations/">See all presentations</a>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <h2>About</h2>
+      <div class="section-body">
+        <p class="lede">We're Cedar Ridge High School's computer science club, run by students. The club came back this year after a year off. Meetings are a mix of short workshops and demo nights, where members show the club something they've built.</p>
+        <div data-list="officers"></div>
       </div>
     </section>
 
     <section class="section" id="join">
       <h2>Join</h2>
       <div class="section-body">
-        <p class="lede">Show up to any meeting. You don't need any experience, and you don't need a project to come watch.</p>
+        <p class="lede">Show up to any meeting. You don't need any experience, and you don't need a project to come watch. If you want something to start on, the <a href="/resources/">resources page</a> has free places to learn.</p>
         <a class="button" href="#meetings">See the next meeting</a>
       </div>
     </section>
@@ -389,228 +100,13 @@ footer {
 <footer>
   <span>Cedar Ridge High School Computer Science Club</span>
   <span>The black hole is rendered live in your browser.</span>
+  <a href="https://github.com/crhs-cs/crhs-cs.github.io" target="_blank" rel="noopener">Source on GitHub</a>
 </footer>
 
-<script>
-(() => {
-  const canvas = document.getElementById('sky');
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' });
-  if (!gl) return; // CSS gradient on the canvas stays as the fallback
-
-  const vert = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.,1.); }`;
-  const frag = `
-precision highp float;
-uniform vec2 uRes;
-uniform float uTime;
-uniform float uDist;
-uniform float uElev;
-uniform float uShift;
-uniform float uSteps;
-uniform float uFade;
-
-float hash(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
-float noise(vec2 p){
-  vec2 i = floor(p), f = fract(p);
-  vec2 u = f*f*(3.0-2.0*f);
-  return mix(mix(hash(i), hash(i+vec2(1,0)), u.x), mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), u.x), u.y);
-}
-float fbm(vec2 p){
-  float v = 0.0, a = 0.5;
-  for (int i = 0; i < 5; i++){ v += a*noise(p); p = p*2.03 + 17.1; a *= 0.5; }
-  return v;
-}
-vec2 rot(vec2 v, float a){ float c = cos(a), s = sin(a); return vec2(c*v.x - s*v.y, s*v.x + c*v.y); }
-
-// Disk texture with differential rotation; two time-offset layers crossfade so it never winds up into mush.
-float diskTex(vec2 xz, float r){
-  float omega = 1.6 / pow(r, 1.5);
-  float T = 24.0;
-  float t1 = mod(uTime, T), t2 = mod(uTime + T*0.5, T);
-  float w = abs(t1/T - 0.5) * 2.0;
-  vec2 a = rot(xz, -omega*t1), b = rot(xz, -omega*t2);
-  float n1 = fbm(a*1.3) * 0.6 + fbm(vec2(r*5.0, 0.0) + a*0.35) * 0.6;
-  float n2 = fbm(b*1.3 + 31.0) * 0.6 + fbm(vec2(r*5.0, 7.0) + b*0.35) * 0.6;
-  return mix(n1, n2, w);
-}
-
-void main(){
-  vec2 uv = (gl_FragCoord.xy - 0.5*uRes) / uRes.y;
-  uv.x -= uShift;
-
-  float yaw = 0.0;
-  vec3 ro = uDist * vec3(cos(uElev)*sin(yaw), sin(uElev), cos(uElev)*cos(yaw));
-  vec3 fw = normalize(-ro);
-  vec3 upW = normalize(vec3(0.12, 1.0, 0.0));
-  vec3 rt = normalize(cross(fw, upW));
-  vec3 up = cross(rt, fw);
-  vec3 rd = normalize(fw*1.5 + uv.x*rt + uv.y*up);
-
-  vec3 p = ro, v = rd;
-  vec3 hv = cross(p, v);
-  float h2 = dot(hv, hv);
-
-  vec3 col = vec3(0.0);
-  float alpha = 0.0;
-  bool captured = false;
-
-  for (int i = 0; i < 220; i++){
-    if (float(i) >= uSteps) break;
-    float r = length(p);
-    if (r < 1.0){ captured = true; break; }
-    if (r > 60.0) break;
-    float dt = clamp(0.06*r, 0.02, 2.5);
-    vec3 acc = -1.5 * h2 * p / pow(r, 5.0);
-    v += acc*dt;
-    vec3 np = p + v*dt;
-
-    if (p.y * np.y < 0.0){
-      float t = p.y / (p.y - np.y);
-      vec3 hit = mix(p, np, t);
-      float rr = length(hit.xz);
-      if (rr > 2.2 && rr < 10.0){
-        float prof = smoothstep(2.2, 3.0, rr) * (1.0 - smoothstep(5.5, 10.0, rr));
-        float n = diskTex(hit.xz, rr);
-        float dens = prof * clamp(0.15 + n*1.1, 0.0, 1.4);
-        float temp = clamp(3.0/rr, 0.0, 1.0);
-        vec3 c = mix(vec3(0.26, 0.05, 0.60), vec3(0.62, 0.30, 1.0), temp);
-        c = mix(c, vec3(1.0, 0.92, 1.0), pow(temp, 5.0)*0.55);
-        vec3 vel = normalize(vec3(-hit.z, 0.0, hit.x));
-        float dop = 1.0 + 0.6*dot(vel, -normalize(v));
-        c *= dop*dop * pow(3.0/rr, 1.2) * 2.0;
-        float a = clamp(dens, 0.0, 1.0);
-        col += (1.0 - alpha) * c * a;
-        alpha += (1.0 - alpha) * a;
-        if (alpha > 0.98) break;
-      }
-    }
-    p = np;
-  }
-
-  if (!captured && alpha < 0.98){
-    vec3 d = normalize(v);
-    vec2 sp = vec2(atan(d.z, d.x), asin(clamp(d.y, -1.0, 1.0)));
-    vec2 g = sp * 180.0;
-    float h = hash(floor(g));
-    float star = smoothstep(0.996, 1.0, h) * (0.4 + 0.6*hash(floor(g)+3.7));
-    float neb = fbm(sp*2.2 + 4.0);
-    vec3 sky = vec3(star) * vec3(0.85, 0.8, 1.0) + vec3(0.22, 0.08, 0.42) * pow(neb, 3.0) * 0.5;
-    col += (1.0 - alpha) * sky;
-  }
-
-  col = 1.0 - exp(-col * 1.25);
-  vec2 q = gl_FragCoord.xy / uRes;
-  col *= 0.55 + 0.45*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.22);
-  col *= uFade;
-  gl_FragColor = vec4(col, 1.0);
-}`;
-
-  function compile(type, src){
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
-    return s;
-  }
-  const vs = compile(gl.VERTEX_SHADER, vert), fs = compile(gl.FRAGMENT_SHADER, frag);
-  if (!vs || !fs) return;
-  const prog = gl.createProgram();
-  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(prog)); return; }
-  gl.useProgram(prog);
-
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const loc = gl.getAttribLocation(prog, 'p');
-  gl.enableVertexAttribArray(loc);
-  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-
-  const U = {};
-  ['uRes', 'uTime', 'uDist', 'uElev', 'uShift', 'uSteps', 'uFade'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
-
-  const small = Math.min(window.innerWidth, window.innerHeight) < 700;
-  const quality = small ? 0.45 : 0.6;
-  const steps = small ? 140 : 200;
-
-  const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  let lastW = 0;
-  function resize(){
-    const cw = canvas.clientWidth, ch = canvas.clientHeight;
-    // On phones and tablets only a width change (rotation) should re-size the render;
-    // the address bar showing or hiding changes the height and would otherwise warp it.
-    if (touch && lastW && cw === lastW) return;
-    lastW = cw;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let w = Math.floor(cw * dpr * quality);
-    let h = Math.floor(ch * dpr * quality);
-    const maxPx = 1.1e6;
-    if (w * h > maxPx) { const k = Math.sqrt(maxPx / (w * h)); w = Math.floor(w * k); h = Math.floor(h * k); }
-    canvas.width = w; canvas.height = h;
-    gl.viewport(0, 0, w, h);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  const hero = document.querySelector('.hero');
-  const beats = [...document.querySelectorAll('.beat')];
-  const cue = document.querySelector('.cue');
-  const nav = document.querySelector('.nav');
-  const meetings = document.getElementById('meetings');
-  const wideQuery = window.matchMedia('(min-width: 768px) and (min-height: 500px)');
-  let desktop = wideQuery.matches;
-  wideQuery.addEventListener?.('change', e => { desktop = e.matches; });
-
-  const smooth = t => t * t * (3 - 2 * t);
-  const clamp01 = x => Math.max(0, Math.min(1, x));
-
-  let target = 0, cur = 0;
-  function readScroll(){
-    const span = hero.offsetHeight - window.innerHeight;
-    target = span > 0 ? clamp01(window.scrollY / span) : 0;
-  }
-  readScroll();
-  window.addEventListener('scroll', readScroll, { passive: true });
-
-  function updateText(s){
-    if (reduce) return;
-    const o1 = desktop ? 1 - clamp01((s - 0.04) / 0.2) : 1 - clamp01((s - 0.1) / 0.3);
-    [o1].forEach((o, i) => {
-      beats[i].style.opacity = o.toFixed(3);
-      beats[i].style.transform = `translateY(${((1 - o) * 24).toFixed(1)}px)`;
-    });
-    if (cue) cue.style.opacity = (1 - clamp01(s / 0.06)).toFixed(3);
-  }
-
-  const start = performance.now();
-  const frozenTime = 9.0;
-  function frame(now){
-    cur += (target - cur) * 0.12;
-    const s = reduce ? 0.35 : cur;
-    updateText(s);
-
-    const pastHero = window.scrollY > hero.offsetHeight + window.innerHeight * 0.5;
-    nav.classList.toggle('solid', meetings.getBoundingClientRect().top < nav.offsetHeight);
-    if (!pastHero || reduce) {
-      const e = smooth(s);
-      const wide = canvas.width / canvas.height;
-      gl.uniform2f(U.uRes, canvas.width, canvas.height);
-      gl.uniform1f(U.uTime, reduce ? frozenTime : (now - start) / 1000);
-      gl.uniform1f(U.uDist, 20.0 - 15.2 * e);
-      gl.uniform1f(U.uElev, 0.2 - 0.13 * e);
-      gl.uniform1f(U.uShift, wide > 1.1 ? (0.22 * (1 - e)) : 0.0);
-      gl.uniform1f(U.uSteps, steps);
-      gl.uniform1f(U.uFade, 1.0);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-    }
-    if (!reduce) requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-  if (reduce) {
-    // redraw the single still frame when the size changes
-    window.addEventListener('resize', () => requestAnimationFrame(frame));
-  }
-})();
-</script>
+<script src="/data/projects.js"></script>
+<script src="/data/presentations.js"></script>
+<script src="/data/officers.js"></script>
+<script src="/assets/site.js"></script>
+<script src="/assets/blackhole.js"></script>
 </body>
 </html>

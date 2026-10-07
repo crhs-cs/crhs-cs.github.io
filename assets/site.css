@@ -1,0 +1,383 @@
+/* Cedar Ridge CS Club: shared styles for every page.
+   Home: a live black hole fills the screen; scrolling pulls the camera toward it while the title fades,
+   then the club's content rises over it. Other pages: a quiet header in the same palette, then lists. */
+:root {
+  --void: #07040d;        /* deep purple-black, the page ground */
+  --void-raised: #110a1d; /* panels and rows */
+  --purple: #8b55e8;      /* school purple, buttons and links */
+  --lavender: #cdb4ff;    /* hover, highlights */
+  --silver: #d9d6e0;      /* school silver, headings */
+  --dim: #8f889c;         /* secondary text, rules */
+  --line: rgba(217, 214, 224, 0.16);
+
+  --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --font-body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.75rem;
+  --step-3: clamp(2rem, 4.5vw, 3.25rem);
+  --step-4: clamp(3.4rem, 11vw, 9.5rem);
+
+  --gutter: clamp(16px, 4vw, 3rem);
+  --column: 68.75rem;
+  color-scheme: dark;
+}
+
+/* Type and layout grow together on large screens: 16px up to ~1270px wide, rising to 22px at ~2560px. */
+html { background: var(--void); scroll-behavior: smooth; font-size: clamp(16px, 0.47vw + 10px, 22px); }
+body {
+  background: var(--void);
+  color: var(--silver);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--lavender); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outline-offset: 3px; border-radius: 2px; }
+
+/* ---------- background canvas (home only) ---------- */
+#sky {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+  background: radial-gradient(ellipse 60% 30% at 62% 52%, #4a2391 0%, #1a0d33 45%, var(--void) 75%);
+}
+
+/* ---------- nav ---------- */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: calc(env(safe-area-inset-top, 0px) + 18px) var(--gutter) 18px;
+  background: linear-gradient(to bottom, rgba(7, 4, 13, 0.75), rgba(7, 4, 13, 0));
+  transition: background 0.3s;
+}
+.nav.solid { background: rgba(7, 4, 13, 0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  color: var(--silver);
+  text-decoration: none;
+}
+.nav ul { display: flex; gap: clamp(14px, 2.2vw, 32px); list-style: none; margin: 0; padding: 0; }
+.nav ul a { color: var(--silver); text-decoration: none; font-size: 0.95rem; font-weight: 500; opacity: 0.85; }
+.nav ul a:hover { opacity: 1; color: var(--lavender); }
+.nav ul a[aria-current="page"] { opacity: 1; color: var(--lavender); }
+.menu-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--silver);
+  font: 500 0.9rem var(--font-body);
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .menu-toggle { display: inline-block; }
+  .nav ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0;
+    background: var(--void);
+    border-bottom: 1px solid var(--line);
+    padding: 4px var(--gutter) 12px;
+  }
+  .nav.open { background: var(--void); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .nav.open ul { display: flex; }
+  .nav ul a { display: block; padding: 12px 0; font-size: 1.05rem; }
+}
+
+/* ---------- home hero (scroll story) ---------- */
+.hero { position: relative; z-index: 1; height: 190vh; }
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  padding-inline: var(--gutter);
+}
+.beat {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: clamp(48px, 12vh, 120px);
+  max-width: var(--column);
+  will-change: opacity, transform;
+}
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-4);
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--silver);
+  text-wrap: balance;
+  text-shadow: 0 2px 40px rgba(7, 4, 13, 0.6);
+}
+.title .line { display: block; }
+.title .small { font-size: 0.42em; letter-spacing: 0.04em; font-weight: 600; color: var(--lavender); margin-bottom: 0.15em; }
+.cue {
+  position: absolute;
+  right: var(--gutter);
+  bottom: clamp(48px, 12vh, 120px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--dim);
+}
+.cue::after { content: ""; width: 1px; height: 48px; background: linear-gradient(var(--dim), transparent); }
+
+/* ---------- content ---------- */
+.content {
+  overflow-x: clip; /* keeps the full-width dividers from causing sideways scroll */
+  position: relative;
+  z-index: 2;
+}
+.home .content {
+  background: linear-gradient(to bottom, rgba(7, 4, 13, 0) 0, var(--void) 22vh);
+  margin-top: -55vh;
+  padding-top: 12vh;
+}
+.section {
+  max-width: var(--column);
+  margin: 0; /* left-aligned to the same margin as the nav and hero title */
+  padding-inline: var(--gutter);
+  padding-block: clamp(56px, 10vw, 112px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: clamp(24px, 5vw, 72px);
+  position: relative;
+}
+/* Divider between sections runs the full screen width, not just the content column. */
+.section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  border-top: 1px solid var(--line);
+}
+.section:first-child::before { display: none; }
+.section-wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.section-wide .lede { margin-bottom: 8px; }
+.section h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-3);
+  line-height: 1;
+  margin: 0;
+  text-transform: uppercase;
+  color: var(--silver);
+  text-wrap: balance;
+}
+.lede { color: var(--dim); max-width: 60ch; margin: 0 0 28px; }
+.section-body { min-width: 0; }
+.see-all { display: inline-block; margin-top: 20px; font-weight: 500; text-decoration: none; }
+.see-all:hover { text-decoration: underline; }
+
+/* ---------- subpage header ---------- */
+.page-head {
+  position: relative;
+  padding-inline: var(--gutter);
+  padding-block: calc(env(safe-area-inset-top, 0px) + 9rem) clamp(40px, 6vw, 72px);
+  background:
+    radial-gradient(ellipse 55% 70% at 85% 0%, rgba(139, 85, 232, 0.28), transparent 70%),
+    radial-gradient(ellipse 35% 45% at 100% 30%, rgba(205, 180, 255, 0.10), transparent 70%);
+  border-bottom: 1px solid var(--line);
+}
+.page-head h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.5rem, 9vw, 6.5rem);
+  line-height: 0.9;
+  overflow-wrap: break-word;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+  max-width: var(--column);
+  text-wrap: balance;
+}
+.page-head .lede { margin: 0; }
+.page-body {
+  max-width: var(--column);
+  padding-inline: var(--gutter);
+  padding-block: clamp(32px, 5vw, 64px) clamp(56px, 8vw, 96px);
+}
+.page-body > * + * { margin-top: clamp(40px, 6vw, 72px); }
+.group h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-2);
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+/* ---------- calendar ---------- */
+/* The calendar breaks out of the left-aligned column and centers on the screen, with breathing room on both sides. */
+.calendar-wrap {
+  box-sizing: border-box; /* padding sits inside the 100vw, so the calendar centers on the screen */
+  width: 100vw;
+  margin-left: calc(-1 * var(--gutter));
+  padding-inline: max(var(--gutter), 6vw);
+  margin-top: 16px;
+}
+.calendar-inner { max-width: 64rem; margin-inline: auto; }
+.calendar-frame {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1a1a1a;
+  max-width: 100%;
+}
+/* Google's embed has no dark mode: invert it, then rotate hues back so event colors stay purple. */
+.calendar-frame iframe { display: block; width: 100%; height: 42.5rem; border: 0; filter: invert(0.9) hue-rotate(180deg) saturate(1.1); }
+.calendar-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 16px; font-size: 0.95rem; }
+.calendar-links a { font-weight: 500; text-decoration: none; }
+.calendar-links a:hover { text-decoration: underline; }
+@media (max-width: 720px) { .calendar-frame iframe { height: 480px; } }
+
+/* ---------- lists ---------- */
+.note { font-size: 0.85rem; color: var(--dim); margin: 0 0 12px; }
+.empty { color: var(--dim); padding-block: 18px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 0; }
+
+.rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.rows li {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: baseline;
+  padding-block: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.rows .what { font-weight: 600; font-size: var(--step-1); color: var(--silver); min-width: 0; }
+.rows .what a { color: inherit; text-decoration: none; }
+.rows .what a:hover { color: var(--lavender); }
+.rows .what span { display: block; font-weight: 400; font-size: 0.95rem; color: var(--dim); margin-top: 2px; }
+.rows .what .chip { display: inline-block; margin-top: 0; font-size: 0.75rem; font-weight: 600; color: var(--dim); }
+.rows .tags { display: block; font-weight: 500; font-size: 0.8rem; color: var(--lavender); margin-top: 6px; }
+.rows .when { color: var(--dim); font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+.rows .when b { display: block; font-weight: 500; color: var(--silver); }
+.rows .go { font-weight: 500; text-decoration: none; white-space: nowrap; }
+.rows .go:hover { text-decoration: underline; }
+.chip {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dim);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 8px;
+  margin-left: 8px;
+  vertical-align: 0.15em;
+}
+
+/* Opportunities: the deadline leads each row. */
+.rows.dated li { grid-template-columns: 7.5rem minmax(0, 1fr) auto; }
+.date-block { font-variant-numeric: tabular-nums; }
+.date-block .d {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-2);
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--silver);
+}
+.date-block .left { display: block; font-size: 0.85rem; color: var(--lavender); margin-top: 4px; }
+.date-block .left.soon { color: #f0a4ff; font-weight: 600; }
+.date-block .tbd { font-size: 0.95rem; color: var(--dim); }
+details.past { margin-top: 32px; color: var(--dim); }
+details.past summary { cursor: pointer; font-weight: 500; }
+
+/* Officers */
+.people { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 16px 32px; }
+.people b { display: block; font-weight: 600; color: var(--silver); }
+.people span { color: var(--dim); font-size: 0.95rem; }
+
+.button {
+  display: inline-block;
+  background: var(--purple);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+.button:hover { background: #9d6cf0; }
+
+footer {
+  position: relative;
+  z-index: 2;
+  background: var(--void);
+  border-top: 1px solid var(--line);
+  padding-inline: var(--gutter);
+  padding-block: 32px calc(32px + env(safe-area-inset-bottom, 0px));
+  color: var(--dim);
+  font-size: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+footer a { color: var(--dim); }
+footer a:hover { color: var(--lavender); }
+
+@media (max-width: 720px) {
+  .section { grid-template-columns: minmax(0, 1fr); }
+  .rows li { grid-template-columns: minmax(0, 1fr) auto; }
+  .rows .when { grid-column: 1; grid-row: 2; }
+  .rows .go { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+  .rows.dated li { grid-template-columns: minmax(0, 1fr) auto; }
+  .rows.dated .date-block { grid-column: 1 / -1; grid-row: 1; display: flex; align-items: baseline; gap: 12px; }
+  .rows.dated .date-block .left { margin-top: 0; }
+  .rows.dated .what { grid-column: 1; grid-row: 2; }
+  .rows.dated .go { grid-column: 2; grid-row: 2; }
+  .cue { display: none; }
+}
+
+/* Touch devices: mobile browsers resize the viewport as the address bar hides, which makes a
+   sticky stage drift. Pin it to the screen instead; the content still slides over it. */
+@media (hover: none) and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  .stage { position: fixed; top: 0; left: 0; right: 0; height: 100svh; }
+  /* Size the black hole to the full screen height so the toolbar sliding in and out doesn't squish it. */
+  #sky { bottom: auto; height: 100vh; height: 100lvh; }
+}
+
+/* Tablets, laptops and larger screens: a longer zoom that keeps moving until Meetings reaches the top,
+   so there's no stretch where content rises over a still black hole. Phones keep the default. */
+@media (min-width: 768px) and (min-height: 500px) and (prefers-reduced-motion: no-preference) {
+  .hero { height: 240vh; }
+  .home .content { margin-top: -100vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero { height: auto; }
+  .home .content { margin-top: 0; }
+  .stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end; gap: 32px; padding-block: 120px 64px; }
+  .beat { position: static; opacity: 1 !important; transform: none !important; }
+  .cue { display: none; }
+}

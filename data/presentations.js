@@ -1,0 +1,22 @@
+// Slides from club meetings. The site sorts by date, newest first.
+//
+// To add a presentation, copy one block, paste it at the top of the list, and fill it in:
+//   title:       what the meeting covered
+//   description: one short line (optional)
+//   presenter:   first name(s) only
+//   date:        meeting date as "YYYY-MM-DD"
+//   slides:      link to the slides. For Google Slides, set sharing to
+//                "Anyone with the link can view" first, or visitors outside RRISD can't open it.
+//
+// Delete the sample block once real slides are added.
+
+window.CLUB_PRESENTATIONS = [
+  {
+    sample: true,
+    title: "Intro meeting",
+    description: "What the club is, how demo nights work, and how to get a project started",
+    presenter: "Sample",
+    date: "2026-10-07",
+    slides: "",
+  },
+];
