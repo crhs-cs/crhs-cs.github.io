@@ -17,6 +17,7 @@ uniform float uElev;
 uniform float uShift;
 uniform float uSteps;
 uniform float uFade;
+uniform float uFocal;
 
 float hash(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 float noise(vec2 p){
@@ -53,7 +54,7 @@ void main(){
   vec3 upW = normalize(vec3(0.12, 1.0, 0.0));
   vec3 rt = normalize(cross(fw, upW));
   vec3 up = cross(rt, fw);
-  vec3 rd = normalize(fw*1.5 + uv.x*rt + uv.y*up);
+  vec3 rd = normalize(fw*uFocal + uv.x*rt + uv.y*up);
 
   vec3 p = ro, v = rd;
   vec3 hv = cross(p, v);
@@ -136,7 +137,7 @@ void main(){
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uTime', 'uDist', 'uElev', 'uShift', 'uSteps', 'uFade'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+  ['uRes', 'uTime', 'uDist', 'uElev', 'uShift', 'uSteps', 'uFade', 'uFocal'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
 
   const small = Math.min(window.innerWidth, window.innerHeight) < 700;
   const quality = small ? 0.45 : 0.6;
@@ -207,6 +208,12 @@ void main(){
       gl.uniform1f(U.uShift, wide > 1.1 ? (0.22 * (1 - e)) : 0.0);
       gl.uniform1f(U.uSteps, steps);
       gl.uniform1f(U.uFade, 1.0);
+      // End-of-zoom lens: how far the screen's corners reach from the center, compared with a
+      // typical phone (aspect 1:2, half-diagonal ~0.56). A phone gets 1.0, so it's unchanged;
+      // wider screens narrow the view near the end until the shadow covers them the same way.
+      const halfDiag = Math.hypot(0.5 * wide, 0.5);
+      const lens = Math.min(2.4, Math.max(1, halfDiag / 0.56));
+      gl.uniform1f(U.uFocal, 1.5 * (1 + (lens - 1) * e * e));
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
     if (!reduce) requestAnimationFrame(frame);
