@@ -1,8 +1,8 @@
 // Cedar Ridge CS Club: presentations.
 // Loads presentations from two places and merges them:
-//   - the club's presentations Drive folder, listed into a published sheet by tools/presentations-sync.gs
-//     (link in data/config.js as presentationsSheetCSV)
-//   - data/presentations.js, for anything added by hand
+//   - data/presentations.json, built automatically from the files in presentations/slides/
+//     (see tools/build-presentations.py)
+//   - data/presentations.js, for slides that live somewhere else (a Google Slides link, say)
 // Renders [data-presentations-grid] as cards with each deck's first slide as the thumbnail.
 // Add data-limit="3" to show only the newest few (home page).
 (() => {
@@ -10,7 +10,7 @@
   if (!grids.length) return;
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const safeUrl = u => { u = String(u || '').trim(); return /^https?:\/\//i.test(u) ? u : ''; };
+  const safeUrl = u => { u = String(u || '').trim(); return /^https?:\/\//i.test(u) || /^\/(?!\/)/.test(u) ? u : ''; };
   const parseDate = s => {
     s = String(s || '').trim();
     let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
@@ -25,40 +25,17 @@
     const m = String(u || '').match(/(?:\/presentation\/d\/|\/file\/d\/|[?&]id=)([\w-]{20,})/);
     return m ? m[1] : '';
   };
-  // First-slide thumbnails: Drive's thumbnail for any deck, PowerPoint or PDF, with Slides' own
-  // PNG export as a backup for Google Slides. Both need the file shared as "Anyone with the link".
+  // For hand-added Google Slides or Drive links: Drive's first-slide thumbnail, with Slides' own
+  // PNG export as a backup. Both need the file shared as "Anyone with the link".
   const thumbs = (id, url) => id ? [
     `https://drive.google.com/thumbnail?id=${id}&sz=w1280`,
     ...(/docs\.google\.com\/presentation/.test(url) || !url ? [`https://docs.google.com/presentation/d/${id}/export/png`] : []),
   ] : [];
 
-  function parseCSV(text){
-    const rows = []; let row = [], field = '', q = false;
-    for (let i = 0; i < text.length; i++) {
-      const c = text[i];
-      if (q) { if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; } else field += c; }
-      else if (c === '"') q = true;
-      else if (c === ',') { row.push(field); field = ''; }
-      else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(field); rows.push(row); row = []; field = ''; }
-      else field += c;
-    }
-    if (field || row.length) { row.push(field); rows.push(row); }
-    return rows.filter(r => r.some(x => x.trim()));
-  }
-  function rowsToItems(rows){
-    if (rows.length < 2) return [];
-    const h = rows[0].map(x => x.toLowerCase().trim());
-    const find = re => h.findIndex(x => re.test(x));
-    const col = { title: find(/^title|name/), presenter: find(/present/), date: find(/date/), summary: find(/summary|descr/), slides: find(/slides|link|url/), fileId: find(/file id/) };
-    return rows.slice(1).map(r => {
-      const get = k => col[k] >= 0 ? (r[col[k]] || '').trim() : '';
-      return { title: get('title'), presenter: get('presenter'), date: get('date'), summary: get('summary'), slides: get('slides'), fileId: get('fileId') };
-    });
-  }
-
   function normalize(p){
     const slides = safeUrl(p.slides);
-    const id = String(p.fileId || '').trim().match(/^[\w-]{20,}$/) ? String(p.fileId).trim() : fileIdFrom(slides);
+    const thumb = safeUrl(p.thumb);
+    const id = thumb ? '' : fileIdFrom(slides);
     return {
       sample: !!p.sample,
       title: String(p.title || '').trim(),
@@ -66,24 +43,23 @@
       date: parseDate(p.date),
       summary: String(p.summary || p.description || '').trim(),
       slides, id,
-      images: thumbs(id, slides),
-      key: id || slides || String(p.title || '').toLowerCase(),
+      images: thumb ? [thumb] : thumbs(id, slides),
+      key: slides || String(p.title || '').toLowerCase(),
     };
   }
 
   async function load(){
     const local = (window.CLUB_PRESENTATIONS || []).map(normalize);
-    let remote = [];
-    const url = (window.CLUB_CONFIG || {}).presentationsSheetCSV;
-    if (url) {
-      try {
-        const res = await fetch(url, { cache: 'no-store' });
-        if (res.ok) remote = rowsToItems(parseCSV(await res.text())).map(normalize);
-      } catch (e) { console.warn('Could not load the presentations sheet', e); }
-    }
+    let uploaded = [];
+    try {
+      const res = await fetch('/data/presentations.json', { cache: 'no-store' });
+      if (res.ok) uploaded = (await res.json()).map(normalize);
+    } catch (e) { console.warn('Could not load data/presentations.json', e); }
     const byKey = new Map();
-    [...remote, ...local].forEach(p => { if (p.title) byKey.set(p.key, p); });   // a hand-added entry wins
-    return [...byKey.values()].sort((a, b) => (b.date || 0) - (a.date || 0) || a.title.localeCompare(b.title));
+    [...uploaded, ...local].forEach(p => { if (p.title) byKey.set(p.key, p); });
+    let all = [...byKey.values()];
+    if (all.some(p => !p.sample)) all = all.filter(p => !p.sample);   // the sample disappears once real slides exist
+    return all.sort((a, b) => (b.date || 0) - (a.date || 0) || a.title.localeCompare(b.title));
   }
 
   // Generated cover, shown until (or instead of) the first-slide thumbnail.

@@ -37,11 +37,13 @@ entry by adding a corrected block with the same `id`.
 
 ## Adding a presentation
 
-Drop the slides (Google Slides, PowerPoint or PDF) into the club's **CRHS CS Club presentations**
-Drive folder, named like `2026-10-14 Intro to Git (Rishi B.)`. A script syncs the folder into the
-spreadsheet every 15 minutes, and the site reads it, so the deck appears within about 20 minutes.
-The first slide becomes the card's thumbnail. Setup and details are in `tools/presentations-sync.gs`.
-`data/presentations.js` still works for anything that isn't in the folder.
+Upload the slides (a PDF is best; PowerPoint works too) to **`presentations/slides/`**, named like
+`2026-10-14 Intro to Git (Rishi B.).pdf`. Step-by-step instructions are in that folder's README.
+
+A GitHub Action (`.github/workflows/presentations.yml`) then renders the first slide as the card
+picture and updates `data/presentations.json`; the site picks it up a minute or two later. You can
+watch it run under the repo's **Actions** tab. `data/presentations.js` is only for slides that live
+somewhere else, like a Google Slides link.
 
 ## Editing other content
 

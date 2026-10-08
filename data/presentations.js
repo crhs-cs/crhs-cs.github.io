@@ -1,8 +1,8 @@
 // Slides from club meetings. The site sorts by date, newest first.
 //
-// Usually you don't need this file: drop the slides into the club's presentations Drive folder
-// and they show up on their own (see tools/presentations-sync.gs). Use this file for anything
-// that isn't in that folder.
+// Usually you don't need this file: upload the slides to presentations/slides/ and they show up
+// on their own (instructions in presentations/slides/README.md). Use this file only for slides
+// that live somewhere else, like a Google Slides link.
 //
 // To add a presentation here, copy one block, paste it at the top of the list, and fill it in:
 //   title:       what the meeting covered
@@ -12,7 +12,7 @@
 //   slides:      link to the slides. For Google Slides, set sharing to
 //                "Anyone with the link can view" first, or visitors outside RRISD can't open it.
 //
-// Delete the sample block once real slides are added.
+// The sample block hides itself once real slides are added, so it can stay or be deleted.
 
 window.CLUB_PRESENTATIONS = [
   {
