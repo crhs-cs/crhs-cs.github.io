@@ -497,13 +497,21 @@ footer a:hover { color: var(--lavender); }
 .pcard-link {
   display: flex; flex-direction: column; height: 100%;
   color: inherit; text-decoration: none;
-  border: 1px solid var(--line);
   border-radius: 10px;
   overflow: hidden;
   background: var(--void-raised);
-  transition: border-color 0.2s, transform 0.2s;
+  transition: transform 0.2s;
+  position: relative;
+  isolation: isolate;   /* Safari: keeps a fading-in image inside the rounded corners */
 }
-.pcard-link:hover { border-color: rgba(205, 180, 255, 0.5); transform: translateY(-2px); }
+/* The border is a frame drawn on top, so iPhone Safari can't paint the image over it. */
+.pcard-link::after, .project-media::after {
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  border: 1px solid var(--line); border-radius: inherit;
+  transition: border-color 0.2s;
+}
+.pcard-link:hover { transform: translateY(-2px); }
+.pcard-link:hover::after { border-color: rgba(205, 180, 255, 0.5); }
 .pcard-link:focus-visible { outline: 2px solid var(--lavender); outline-offset: 3px; }
 .pcard-media { aspect-ratio: 16 / 10; background: #0d0818; overflow: hidden; border-bottom: 1px solid var(--line); }
 .pcard-media img, .project-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -558,7 +566,7 @@ footer a:hover { color: var(--lavender); }
 .byline { margin: 0 0 12px; color: var(--dim); }
 .project-body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
 .project-body > * + * { margin-top: 0; }
-.project-media { aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #0d0818; }
+.project-media { aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; background: #0d0818; position: relative; isolation: isolate; }
 .project-text p { margin: 0 0 1em; max-width: 62ch; }
 .project-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 .button-ghost {
@@ -774,8 +782,9 @@ a, button { -webkit-tap-highlight-color: transparent; }
 @media (hover: none) {
   .slide-rows a:hover { background: none; }
   .slide-rows a:active { background: rgba(139, 85, 232, 0.12); }
-  .pcard-link:hover { transform: none; border-color: var(--line); }
-  .pcard-link:active { border-color: rgba(205, 180, 255, 0.5); }
+  .pcard-link:hover { transform: none; }
+  .pcard-link:hover::after { border-color: var(--line); }
+  .pcard-link:active::after { border-color: rgba(205, 180, 255, 0.5); }
   .join-grid li:hover { border-color: var(--line); }
   .button:hover { background: var(--purple); box-shadow: none; }
   .pcard-link:hover .pcard-go::after, .slide-rows a:hover .go::after, .more:hover::after, .back:hover::before { transform: none; }
