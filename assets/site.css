@@ -213,7 +213,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
 .section-head h2 { font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 0.9; }
 .section-head h2 + .lede { margin: 0; }
 .more { font-weight: 600; text-decoration: none; white-space: nowrap; }
-.more::after { content: "\00a0\2192"; display: inline-block; transition: transform 0.2s; }
 .more:hover::after { transform: translateX(3px); }
 .more[hidden] { display: none; }
 
@@ -224,6 +223,23 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--lavender); outl
   padding-bottom: 2px;
 }
 .more:hover, .path a:hover, .calendar-links a:hover { background-size: 100% 1px; text-decoration: none; }
+
+/* Arrows on links: short, heavy strokes, colored like the link text. */
+.more::after, .pcard-go::after, .slide-rows .go::after, .back::before {
+  content: "";
+  display: inline-block;
+  width: 0.82em; height: 0.82em;
+  vertical-align: -0.1em;
+  background: currentColor;
+  -webkit-mask: var(--arrow) center / contain no-repeat;
+  mask: var(--arrow) center / contain no-repeat;
+  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.more::after { --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8h9M8 3.5 12.5 8 8 12.5' fill='none' stroke='%23000' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); margin-left: 0.22em; }
+.back::before { --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13 8H4M8 3.5 3.5 8 8 12.5' fill='none' stroke='%23000' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); margin-right: 0.22em; }
+.pcard-go::after, .slide-rows .go::after { --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 11.5 11 5M5.5 4.5H11.5V10.5' fill='none' stroke='%23000' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); margin-left: 0.18em; }
+.back:hover::before { transform: translateX(-3px); }
+.pcard-link:hover .pcard-go::after, .slide-rows a:hover .go::after { transform: translate(2px, -2px); }
 
 /* ---------- subpage header ---------- */
 .page-head {
@@ -535,7 +551,7 @@ footer a:hover { color: var(--lavender); }
 .project-head { padding-block: calc(env(safe-area-inset-top, 0px) + 7.5rem) clamp(28px, 4vw, 48px); }
 .project-head h1 { font-size: clamp(2.4rem, 7vw, 5.5rem); margin-bottom: 12px; }
 .back { display: inline-block; margin-bottom: 18px; color: var(--dim); text-decoration: none; font-size: 0.95rem; }
-.back::before { content: "\2190\00a0"; }
+
 .back:hover { color: var(--lavender); }
 .byline { margin: 0 0 12px; color: var(--dim); }
 .project-body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
@@ -566,7 +582,7 @@ footer a:hover { color: var(--lavender); }
 /* ---------- presentations ---------- */
 .slide-media { aspect-ratio: 16 / 9; }
 .pcard-go { margin-top: 10px; font-size: 0.9rem; font-weight: 600; color: var(--lavender); }
-.pcard-go::after { content: "\00a0\2197"; }
+
 .pcard-link:hover .pcard-go { text-decoration: underline; }
 .section [data-presentations-grid] .pgrid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
 
@@ -623,7 +639,7 @@ footer a:hover { color: var(--lavender); }
 .slide-rows .t { font-size: var(--step-1); font-weight: 600; color: var(--silver); }
 .slide-rows .by { color: var(--dim); }
 .slide-rows .go { color: var(--lavender); font-weight: 600; text-align: right; }
-.slide-rows .go::after { content: "\00a0\2197"; display: inline-block; transition: transform 0.2s; }
+
 .slide-rows a:hover .go::after { transform: translate(2px, -2px); }
 
 /* ---------- home: join ---------- */
@@ -663,4 +679,46 @@ footer a:hover { color: var(--lavender); }
 @media (prefers-reduced-motion: reduce) {
   .cue span { animation: none; }
   *, *::before, *::after { transition-duration: 0.01ms !important; }
+}
+
+/* ---------- scroll reveal (home) ---------- */
+/* site.js adds .reveal to <html> only when it can animate, and .in to each section as it arrives.
+   Headings rise from behind their own baseline; everything else slides up a little, one after another. */
+.reveal .section:not(.in) .section-head > *,
+.reveal .section:not(.in) .next-main > *,
+.reveal .section:not(.in) .next-after li,
+.reveal .section:not(.in) .calendar-wrap,
+.reveal .section:not(.in) .pcard,
+.reveal .section:not(.in) .slide-rows li,
+.reveal .section:not(.in) .invite,
+.reveal .section:not(.in) .statement,
+.reveal .section:not(.in) .path li { opacity: 0; }
+
+.reveal .section.in .section-head h2 { animation: rise 0.8s cubic-bezier(0.2, 0.75, 0.15, 1) both; }
+.reveal .section.in .next-date { animation: rise 0.9s cubic-bezier(0.2, 0.75, 0.15, 1) 0.12s both; }
+.reveal .section.in :is(.section-head .more, .next-label, .next-title, .next-detail, .next-after li,
+  .calendar-wrap, .pcard, .slide-rows li, .invite, .statement, .path li) {
+  animation: lift 0.7s cubic-bezier(0.2, 0.75, 0.15, 1) both;
+  animation-delay: calc(0.15s + var(--i, 0) * 0.08s);
+}
+.reveal .section.in .next-label { --i: 0; }
+.reveal .section.in .next-title { --i: 3; }
+.reveal .section.in .next-detail { --i: 4; }
+.reveal .section.in .calendar-wrap { --i: 6; }
+.reveal .section.in .statement { --i: 1; }
+.reveal .section.in :is(.next-after li, .pcard, .slide-rows li, .path li):nth-child(1) { --i: 2; }
+.reveal .section.in :is(.next-after li, .pcard, .slide-rows li, .path li):nth-child(2) { --i: 3; }
+.reveal .section.in :is(.next-after li, .pcard, .slide-rows li, .path li):nth-child(3) { --i: 4; }
+.reveal .section.in :is(.next-after li, .pcard, .slide-rows li, .path li):nth-child(4) { --i: 5; }
+.reveal .section.in .path li { --i: 3; }
+.reveal .section.in .path li:nth-child(2) { --i: 5; }
+.reveal .section.in .path li:nth-child(3) { --i: 7; }
+
+@keyframes rise {
+  from { clip-path: inset(0 0 100% 0); transform: translateY(0.35em); }
+  to { clip-path: inset(0 0 -0.2em 0); transform: none; }
+}
+@keyframes lift {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
 }

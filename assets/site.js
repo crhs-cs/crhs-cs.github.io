@@ -30,6 +30,20 @@
     window.addEventListener('resize', update);
   }
 
+  // ---------- scroll reveal (home) ----------
+  // Each section animates in once as it comes on screen (styles in site.css, under "scroll reveal").
+  // Cards and rows drawn later by other scripts animate when they're added, since the section is
+  // already marked. Skipped for reduced motion, and without IntersectionObserver nothing is hidden.
+  if (document.body.classList.contains('home') && 'IntersectionObserver' in window
+      && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const sections = document.querySelectorAll('.content .section');
+    document.documentElement.classList.add('reveal');
+    const io = new IntersectionObserver(entries => entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    }), { rootMargin: '0px 0px -12% 0px' });
+    sections.forEach(s => io.observe(s));
+  }
+
   // ---------- helpers ----------
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const parseDate = s => {
