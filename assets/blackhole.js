@@ -32,16 +32,36 @@ float fbm(vec2 p){
 }
 vec2 rot(vec2 v, float a){ float c = cos(a), s = sin(a); return vec2(c*v.x - s*v.y, s*v.x + c*v.y); }
 
-// Disk texture with differential rotation; two time-offset layers crossfade so it never winds up into mush.
+// Value noise that repeats every per cells along x, so the disk has no seam where the angle wraps.
+float pnoise(vec2 p, float per){
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f*f*(3.0-2.0*f);
+  float x0 = mod(i.x, per), x1 = mod(i.x + 1.0, per);
+  return mix(mix(hash(vec2(x0, i.y)), hash(vec2(x1, i.y)), u.x),
+             mix(hash(vec2(x0, i.y + 1.0)), hash(vec2(x1, i.y + 1.0)), u.x), u.y);
+}
+float pfbm(vec2 p, float per){
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 4; i++){ v += a*pnoise(p, per); p = p*2.0 + vec2(0.0, 13.7); per *= 2.0; a *= 0.5; }
+  return v / 0.9375;
+}
+
+// Disk gas, drawn in orbit coordinates (angle around, log of radius out) so it forms long filaments
+// along the orbit. Each ring turns at its own Keplerian speed, so inner gas laps outer gas and the
+// filaments shear into spirals; the whole pattern drifts slowly inward. Shear builds up forever, so
+// two copies of different ages crossfade, with contrast held constant so the swap can't be seen.
 float diskTex(vec2 xz, float r){
-  float omega = 1.6 / pow(r, 1.5);
-  float T = 24.0;
+  const float P = 11.0;                                   // filaments around the disk
+  float ang = (atan(xz.y, xz.x) / 6.2831853 + 0.5) * P;
+  float rad = log(r) * 6.5 + uTime * 0.08;               // + inflow
+  float spin = 1.6 / pow(r, 1.5) * P / 6.2831853;         // angular speed, in filaments per second
+  float T = 30.0;
   float t1 = mod(uTime, T), t2 = mod(uTime + T*0.5, T);
-  float w = abs(t1/T - 0.5) * 2.0;
-  vec2 a = rot(xz, -omega*t1), b = rot(xz, -omega*t2);
-  float n1 = fbm(a*1.3) * 0.6 + fbm(vec2(r*5.0, 0.0) + a*0.35) * 0.6;
-  float n2 = fbm(b*1.3 + 31.0) * 0.6 + fbm(vec2(r*5.0, 7.0) + b*0.35) * 0.6;
-  return mix(n1, n2, w);
+  float w = abs(t1/T - 0.5) * 2.0;                        // each copy is invisible when it resets
+  float n1 = pfbm(vec2(ang - spin*t1, rad), P);
+  float n2 = pfbm(vec2(ang - spin*t2, rad + 40.0), P);
+  float n = mix(n1, n2, w);
+  return 0.5 + (n - 0.5) * inversesqrt(w*w + (1.0-w)*(1.0-w));
 }
 
 void main(){
@@ -79,15 +99,23 @@ void main(){
       vec3 hit = mix(p, np, t);
       float rr = length(hit.xz);
       if (rr > 2.2 && rr < 10.0){
-        float prof = smoothstep(2.2, 3.0, rr) * (1.0 - smoothstep(5.5, 10.0, rr));
         float n = diskTex(hit.xz, rr);
-        float dens = prof * clamp(0.15 + n*1.1, 0.0, 1.4);
-        float temp = clamp(3.0/rr, 0.0, 1.0);
-        vec3 c = mix(vec3(0.26, 0.05, 0.60), vec3(0.62, 0.30, 1.0), temp);
-        c = mix(c, vec3(1.0, 0.92, 1.0), pow(temp, 5.0)*0.55);
+        float prof = smoothstep(2.2, 2.9, rr) * (1.0 - smoothstep(5.5, 10.0, rr));
+        float dens = prof * (0.42 + 0.85*smoothstep(0.15, 0.85, n));
+        // Thin-disk temperature, peaking near the inner edge and falling off outward. (Its zero point
+        // sits just inside the visible edge, so the gas hugging the shadow still glows.)
+        float tEm = pow(max(1.0 - sqrt(1.8/rr), 0.0), 0.25) * pow(1.8/rr, 0.75) / 0.49;
+        // Relativistic Doppler and gravitational shift: gas orbits at sqrt(M/(r-2M)), so the side
+        // coming toward you is brighter and hotter-looking, the far side dimmer and deeper purple.
+        float beta = sqrt(0.5 / (rr - 1.0));
         vec3 vel = normalize(vec3(-hit.z, 0.0, hit.x));
-        float dop = 1.0 + 0.6*dot(vel, -normalize(v));
-        c *= dop*dop * pow(3.0/rr, 1.2) * 2.0;
+        float g = sqrt(1.0 - 1.0/rr) * sqrt(1.0 - beta*beta) / (1.0 - beta*dot(vel, -normalize(v)));
+        g = mix(1.0, g, 0.8);
+        float tObs = tEm * g;
+        vec3 c = mix(vec3(0.22, 0.04, 0.52), vec3(0.58, 0.28, 1.0), smoothstep(0.15, 0.75, tObs));
+        c = mix(c, vec3(1.0, 0.93, 1.0), smoothstep(0.8, 1.45, tObs));
+        c *= (0.25 + 2.3*pow(tObs, 2.0)) * g;
+        c += vec3(1.0, 0.92, 1.0) * smoothstep(0.68, 0.92, n) * tObs * 0.5;   // hot knots
         float a = clamp(dens, 0.0, 1.0);
         col += (1.0 - alpha) * c * a;
         alpha += (1.0 - alpha) * a;
