@@ -2,9 +2,9 @@
 // A fragment shader traces light rays bending around a black hole (a simplified Schwarzschild
 // geodesic) and shades the accretion disk they cross. Scrolling moves the camera toward it.
 (() => {
-  // "Pull": while you scroll, the view lunges toward the black hole, the space around it streams
-  // outward and twists slightly, and the edges darken, then it eases back when you stop. The title
-  // is dragged toward the hole as it fades. Set to 0 to turn all of that off (the dive is unchanged).
+  // "Pull": while you scroll, the camera surges toward the black hole (the ray tracing renders the
+  // closer view for real, so the lensing changes the way it physically would) and the edges darken,
+  // then it eases back when you stop. Set to 0 to turn it off (the dive is unchanged).
   const PULL = 1;
 
   const canvas = document.getElementById('sky');
@@ -23,8 +23,7 @@ uniform float uShift;
 uniform float uSteps;
 uniform float uFade;
 uniform float uFocal;
-uniform float uPull;   // 0..1, how fast you're scrolling (smoothed)
-uniform float uDepth;  // 0..1, how far into the dive
+uniform float uPull;   // 0..1, how fast you're scrolling (smoothed); darkens the edges
 
 float hash(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 float noise(vec2 p){
@@ -54,11 +53,6 @@ float diskTex(vec2 xz, float r){
 void main(){
   vec2 uv = (gl_FragCoord.xy - 0.5*uRes) / uRes.y;
   uv.x -= uShift;
-  // Pulled in: everything streams outward from the hole like you're rushing at it (the screen's
-  // edges show sky from nearer the center), with a slight twist around it.
-  float r2 = dot(uv, uv);
-  uv /= 1.0 + (uPull*0.55 + uDepth*0.1) * r2;
-  uv = rot(uv, (uPull*0.3 + uDepth*0.1) * exp(-r2*2.5));
 
   float yaw = 0.0;
   vec3 ro = uDist * vec3(cos(uElev)*sin(yaw), sin(uElev), cos(uElev)*cos(yaw));
@@ -66,7 +60,7 @@ void main(){
   vec3 upW = normalize(vec3(0.12, 1.0, 0.0));
   vec3 rt = normalize(cross(fw, upW));
   vec3 up = cross(rt, fw);
-  vec3 rd = normalize(fw*uFocal*(1.0 + 0.18*uPull) + uv.x*rt + uv.y*up);
+  vec3 rd = normalize(fw*uFocal + uv.x*rt + uv.y*up);
 
   vec3 p = ro, v = rd;
   vec3 hv = cross(p, v);
@@ -149,7 +143,7 @@ void main(){
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uTime', 'uDist', 'uElev', 'uShift', 'uSteps', 'uFade', 'uFocal', 'uPull', 'uDepth'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+  ['uRes', 'uTime', 'uDist', 'uElev', 'uShift', 'uSteps', 'uFade', 'uFocal', 'uPull'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
 
   const small = Math.min(window.innerWidth, window.innerHeight) < 700;
   const quality = small ? 0.45 : 0.6;
@@ -196,12 +190,8 @@ void main(){
     if (reduce) return;
     const o1 = desktop ? 1 - clamp01((s - 0.04) / 0.2) : 1 - clamp01((s - 0.1) / 0.3);
     [o1].forEach((o, i) => {
-      const k = 1 - o;
       beats[i].style.opacity = o.toFixed(3);
-      // With the pull on, the title is dragged up and right toward the hole and shrinks as it fades.
-      beats[i].style.transform = PULL
-        ? `translate(${(k * 70).toFixed(1)}px, ${(-k * 46).toFixed(1)}px) scale(${(1 - 0.16 * k).toFixed(3)})`
-        : `translateY(${(k * 24).toFixed(1)}px)`;
+      beats[i].style.transform = `translateY(${((1 - o) * 24).toFixed(1)}px)`;
     });
     if (cue) cue.style.opacity = (1 - clamp01(s / 0.06)).toFixed(3);
   }
@@ -224,7 +214,8 @@ void main(){
       const wide = canvas.width / canvas.height;
       gl.uniform2f(U.uRes, canvas.width, canvas.height);
       gl.uniform1f(U.uTime, reduce ? frozenTime : (now - start) / 1000);
-      gl.uniform1f(U.uDist, 20.0 - 15.2 * e);
+      // The surge: up to 14% closer while scrolling fast, proportionally, so it's safe deep in the dive too.
+      gl.uniform1f(U.uDist, (20.0 - 15.2 * e) * (1 - (reduce ? 0 : PULL * 0.14 * pull)));
       gl.uniform1f(U.uElev, 0.2 - 0.13 * e);
       gl.uniform1f(U.uShift, wide > 1.1 ? (0.22 * (1 - e)) : 0.0);
       gl.uniform1f(U.uSteps, steps);
@@ -236,7 +227,6 @@ void main(){
       const lens = Math.min(2.4, Math.max(1, halfDiag / 0.56));
       gl.uniform1f(U.uFocal, 1.5 * (1 + (lens - 1) * e * e));
       gl.uniform1f(U.uPull, reduce ? 0 : PULL * pull);
-      gl.uniform1f(U.uDepth, reduce ? 0 : PULL * e);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
     if (!reduce) requestAnimationFrame(frame);
