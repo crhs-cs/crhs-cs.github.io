@@ -233,6 +233,10 @@ void main(){
     updateText(s);
 
     const pastHero = window.scrollY > hero.offsetHeight + window.innerHeight * 0.5;
+    // Past the intro the canvas would still hold its last frame behind the page, and the bounce at the
+    // bottom of the page (or a jump straight down) would show it. Hide it until you scroll back up.
+    const vis = pastHero && !reduce ? 'hidden' : 'visible';
+    if (canvas.style.visibility !== vis) canvas.style.visibility = vis;
     if (!pastHero || reduce) {
       // Larger screens: finish the dive by 70% of the intro, so you're inside the black hole
       // before Meetings rises into view. Phones keep the original pacing.

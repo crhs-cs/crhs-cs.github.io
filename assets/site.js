@@ -73,6 +73,20 @@
     });
   });
 
+  // ---------- arriving with #section in the link ----------
+  // The browser jumps to the section before the next meeting, projects and slides have loaded, and
+  // they then push it down. Hold it in place while the page settles, until you scroll yourself.
+  const hashTarget = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  const contentEl = document.querySelector('.content');
+  if (hashTarget && contentEl && 'ResizeObserver' in window) {
+    let held = true;
+    const release = () => { held = false; ro.disconnect(); };
+    const ro = new ResizeObserver(() => { if (held) hashTarget.scrollIntoView({ behavior: 'instant', block: 'start' }); });
+    ro.observe(contentEl);
+    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(type => window.addEventListener(type, release, { once: true, passive: true }));
+    setTimeout(release, 4000);
+  }
+
   // ---------- helpers ----------
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const parseDate = s => {

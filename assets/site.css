@@ -544,8 +544,10 @@ footer a:hover { color: var(--lavender); }
 .media-stack .pimg { position: absolute; inset: 0; opacity: 0; transition: opacity 0.25s; }
 .media-stack .pimg.loaded { opacity: 1; }
 
-/* home page: just the newest three */
-.section [data-projects-grid] .pgrid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+/* home page: just the newest three, in fixed columns so one project doesn't stretch across the page */
+.section [data-projects-grid] .pgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .section [data-projects-grid] .pgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .section [data-projects-grid] .pgrid { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- a single project's page ---------- */
 .project-head { padding-block: calc(env(safe-area-inset-top, 0px) + 7.5rem) clamp(28px, 4vw, 48px); }
@@ -682,6 +684,8 @@ footer a:hover { color: var(--lavender); }
 }
 
 /* ---------- home: join ---------- */
+/* At least a screen tall (less the footer), so the Join link can scroll it all the way to the top. */
+#join { box-sizing: border-box; min-height: calc(100vh - 6rem); min-height: calc(100svh - 6rem); align-content: start; }
 .join-grid { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .join-grid li {
   display: flex; flex-direction: column; gap: 2px;
