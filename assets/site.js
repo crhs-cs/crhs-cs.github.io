@@ -56,6 +56,23 @@
     }, { passive: true });
   }
 
+  // ---------- copy buttons (Join section) ----------
+  const status = document.querySelector('[data-copy-status]');
+  document.querySelectorAll('[data-copy]').forEach(btn => {
+    const label = btn.textContent;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy);
+        btn.textContent = 'Copied'; btn.classList.add('done');
+        if (status) status.textContent = `Copied ${btn.dataset.copy}`;
+      } catch (e) {
+        btn.textContent = 'Select the code to copy';
+      }
+      clearTimeout(btn._t);
+      btn._t = setTimeout(() => { btn.textContent = label; btn.classList.remove('done'); }, 1800);
+    });
+  });
+
   // ---------- helpers ----------
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const parseDate = s => {

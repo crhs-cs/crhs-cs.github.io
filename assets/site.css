@@ -642,7 +642,7 @@ footer a:hover { color: var(--lavender); }
 
 .slide-rows a:hover .go::after { transform: translate(2px, -2px); }
 
-/* ---------- home: join ---------- */
+/* ---------- home: about ---------- */
 .statement {
   margin: 0;
   max-width: 30ch;
@@ -681,44 +681,80 @@ footer a:hover { color: var(--lavender); }
   *, *::before, *::after { transition-duration: 0.01ms !important; }
 }
 
+/* ---------- home: join ---------- */
+.join-grid { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.join-grid li {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 22px 22px 20px;
+  background: var(--void-raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+.join-grid li:hover { border-color: rgba(205, 180, 255, 0.35); }
+.join-label { color: var(--dim); font-weight: 500; font-size: 0.95rem; }
+/* Codes and handles stay on one line: sized to the tile's width (the longest, @crhscompsci, just fits). */
+.join-grid li { container-type: inline-size; }
+.join-value { margin-top: 8px; font: 800 min(3rem, 15.5cqi)/1 var(--font-display); letter-spacing: 0.01em; color: var(--silver); white-space: nowrap; }
+.join-note { color: var(--dim); font-size: 0.95rem; margin-top: 4px; }
+.join-actions { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: auto; padding-top: 18px; }
+.join-action {
+  font: 600 0.95rem var(--font-body); color: var(--lavender); text-decoration: none;
+  border: 0; padding: 0 0 2px; cursor: pointer;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.2s;
+}
+.join-action:hover { background-size: 100% 1px; }
+.join-action.done { color: var(--silver); }
+.sr-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
+@media (max-width: 1060px) { .join-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 540px) { .join-grid { grid-template-columns: minmax(0, 1fr); } }
+
 /* ---------- scroll reveal (home) ---------- */
-/* site.js adds .reveal to <html> only when it can animate, and .in to each section as it arrives.
-   Headings rise from behind their own baseline; everything else slides up a little, one after another. */
-.reveal .section:not(.in) .section-head > *,
-.reveal .section:not(.in) .next-main > *,
-.reveal .section:not(.in) .next-after li,
-.reveal .section:not(.in) .calendar-wrap,
-.reveal .section:not(.in) .pcard,
-.reveal .section:not(.in) .slide-rows li,
-.reveal .section:not(.in) .invite,
-.reveal .section:not(.in) .statement,
-.reveal .section:not(.in) .path li { opacity: 0; }
+/* site.js adds .reveal to <html> only when it can animate, and .in to each section as you scroll to it.
+   Every section moves differently so the page doesn't repeat itself:
+   Meetings: the date rises out of its baseline, the list slides in from the right.
+   Projects: the title wipes in, cards rise and grow into place.
+   Presentations: rows slide in from the left.
+   About: the statement sharpens out of a blur, the three steps follow quickly.
+   Join: the info tiles tip forward into place. */
+:root { --ease-out: cubic-bezier(0.2, 0.75, 0.15, 1); }
+.reveal .section:not(.in) :is(.section-head > *, .next-main > *, .next-after li, .calendar-wrap, .pcard,
+  .slide-rows li, .invite, .statement, .path li, .join-grid li) { opacity: 0; }
 
-.reveal .section.in .section-head h2 { animation: rise 0.8s cubic-bezier(0.2, 0.75, 0.15, 1) both; }
-.reveal .section.in .next-date { animation: rise 0.9s cubic-bezier(0.2, 0.75, 0.15, 1) 0.12s both; }
-.reveal .section.in :is(.section-head .more, .next-label, .next-title, .next-detail, .next-after li,
-  .calendar-wrap, .pcard, .slide-rows li, .invite, .statement, .path li) {
-  animation: lift 0.7s cubic-bezier(0.2, 0.75, 0.15, 1) both;
-  animation-delay: calc(0.15s + var(--i, 0) * 0.08s);
-}
-.reveal .section.in .next-label { --i: 0; }
-.reveal .section.in .next-title { --i: 3; }
-.reveal .section.in .next-detail { --i: 4; }
-.reveal .section.in .calendar-wrap { --i: 6; }
-.reveal .section.in .statement { --i: 1; }
-.reveal .section.in :is(.next-after li, .pcard, .slide-rows li, .path li):nth-child(1) { --i: 2; }
-.reveal .section.in :is(.next-after li, .pcard, .slide-rows li, .path li):nth-child(2) { --i: 3; }
-.reveal .section.in :is(.next-after li, .pcard, .slide-rows li, .path li):nth-child(3) { --i: 4; }
-.reveal .section.in :is(.next-after li, .pcard, .slide-rows li, .path li):nth-child(4) { --i: 5; }
-.reveal .section.in .path li { --i: 3; }
-.reveal .section.in .path li:nth-child(2) { --i: 5; }
-.reveal .section.in .path li:nth-child(3) { --i: 7; }
+.reveal :is(#meetings, #presentations, #join).in .section-head h2 { animation: rise 0.7s var(--ease-out) both; }
+.reveal :is(#projects, #about).in .section-head h2 { animation: wipe 0.8s var(--ease-out) both; }
+.reveal .section.in .section-head .more { animation: fade 0.5s ease 0.3s both; }
 
-@keyframes rise {
-  from { clip-path: inset(0 0 100% 0); transform: translateY(0.35em); }
-  to { clip-path: inset(0 0 -0.2em 0); transform: none; }
-}
-@keyframes lift {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: none; }
-}
+.reveal #meetings.in .next-label { animation: lift 0.55s var(--ease-out) 0.05s both; }
+.reveal #meetings.in .next-date { animation: rise 0.85s var(--ease-out) 0.1s both; }
+.reveal #meetings.in .next-title { animation: lift 0.55s var(--ease-out) 0.28s both; }
+.reveal #meetings.in .next-detail { animation: lift 0.55s var(--ease-out) 0.34s both; }
+.reveal #meetings.in .next-after li { animation: from-right 0.6s var(--ease-out) both; animation-delay: calc(0.3s + var(--i, 0) * 0.07s); }
+.reveal #meetings.in .calendar-wrap { animation: settle 0.8s var(--ease-out) 0.45s both; }
+
+.reveal #projects.in .pcard { animation: grow 0.6s var(--ease-out) both; animation-delay: calc(0.15s + var(--i, 0) * 0.08s); }
+.reveal #projects.in .invite { animation: grow 0.6s var(--ease-out) 0.2s both; }
+
+.reveal #presentations.in .slide-rows li { animation: from-left 0.55s var(--ease-out) both; animation-delay: calc(0.12s + var(--i, 0) * 0.07s); }
+
+.reveal #about.in .statement { animation: focus 0.8s var(--ease-out) 0.1s both; }
+.reveal #about.in .path li { animation: lift 0.45s var(--ease-out) both; animation-delay: calc(0.3s + var(--i, 0) * 0.07s); }
+
+.reveal #join.in .join-grid li { animation: tip 0.6s var(--ease-out) both; animation-delay: calc(0.1s + var(--i, 0) * 0.07s); }
+
+.reveal :is(.next-after li, .pcard, .slide-rows li, .path li, .join-grid li):nth-child(2) { --i: 1; }
+.reveal :is(.next-after li, .pcard, .slide-rows li, .path li, .join-grid li):nth-child(3) { --i: 2; }
+.reveal :is(.next-after li, .pcard, .slide-rows li, .path li, .join-grid li):nth-child(4) { --i: 3; }
+
+@keyframes rise { from { clip-path: inset(0 0 100% 0); transform: translateY(0.35em); } to { clip-path: inset(0 0 -0.2em 0); transform: none; } }
+@keyframes wipe { from { clip-path: inset(0 100% -0.2em 0); } to { clip-path: inset(0 0 -0.2em 0); } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lift { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes from-right { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
+@keyframes from-left { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+@keyframes settle { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes grow { from { opacity: 0; transform: translateY(28px) scale(0.95); } to { opacity: 1; transform: none; } }
+@keyframes focus { from { opacity: 0; filter: blur(10px); transform: translateY(6px); } to { opacity: 1; filter: none; transform: none; } }
+@keyframes tip { from { opacity: 0; transform: perspective(700px) rotateX(-28deg) translateY(14px); } to { opacity: 1; transform: none; } }
+.join-grid li { transform-origin: 50% 0; }

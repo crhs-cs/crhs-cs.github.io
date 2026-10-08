@@ -1,4 +1,4 @@
-// Club officers and sponsor, shown in the Join section on the home page.
+// Club officers and sponsor, shown in the About section on the home page.
 // The section hides this list while it's empty, so nothing placeholder-looking shows up.
 // Use first names, or first name and last initial, since the site is public.
 //
