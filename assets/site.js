@@ -31,17 +31,29 @@
   }
 
   // ---------- scroll reveal (home) ----------
-  // Each section animates in once as it comes on screen (styles in site.css, under "scroll reveal").
-  // Cards and rows drawn later by other scripts animate when they're added, since the section is
-  // already marked. Skipped for reduced motion, and without IntersectionObserver nothing is hidden.
+  // Each section animates in as you scroll down to it (styles in site.css, under "scroll reveal").
+  // It resets only once it's entirely below the screen again, so scrolling back down replays it,
+  // but scrolling up never hides what you're returning to. Cards drawn later by other scripts
+  // animate when they're added. Skipped for reduced motion; without IntersectionObserver nothing hides.
   if (document.body.classList.contains('home') && 'IntersectionObserver' in window
       && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const sections = document.querySelectorAll('.content .section');
     document.documentElement.classList.add('reveal');
     const io = new IntersectionObserver(entries => entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      if (e.isIntersecting) e.target.classList.add('in');
     }), { rootMargin: '0px 0px -12% 0px' });
     sections.forEach(s => io.observe(s));
+    // Reset sections that are entirely below the screen (checked on scroll, since a jump can skip
+    // past a section without it ever crossing the screen edge).
+    let queued = false;
+    window.addEventListener('scroll', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        sections.forEach(s => { if (s.classList.contains('in') && s.getBoundingClientRect().top >= window.innerHeight) s.classList.remove('in'); });
+      });
+    }, { passive: true });
   }
 
   // ---------- helpers ----------
