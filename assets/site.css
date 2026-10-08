@@ -766,3 +766,20 @@ footer a:hover { color: var(--lavender); }
 @keyframes focus { from { opacity: 0; filter: blur(10px); transform: translateY(6px); } to { opacity: 1; filter: none; transform: none; } }
 @keyframes tip { from { opacity: 0; transform: perspective(700px) rotateX(-28deg) translateY(14px); } to { opacity: 1; transform: none; } }
 .join-grid li { transform-origin: 50% 0; }
+
+/* ---------- touch screens ---------- */
+/* Phones keep a tapped link in its hover state after you come back, which left a stuck purple box
+   on rows and cards. Touch screens get a quick press highlight instead; mouse users are unchanged. */
+a, button { -webkit-tap-highlight-color: transparent; }
+@media (hover: none) {
+  .slide-rows a:hover { background: none; }
+  .slide-rows a:active { background: rgba(139, 85, 232, 0.12); }
+  .pcard-link:hover { transform: none; border-color: var(--line); }
+  .pcard-link:active { border-color: rgba(205, 180, 255, 0.5); }
+  .join-grid li:hover { border-color: var(--line); }
+  .button:hover { background: var(--purple); box-shadow: none; }
+  .pcard-link:hover .pcard-go::after, .slide-rows a:hover .go::after, .more:hover::after, .back:hover::before { transform: none; }
+  .more:hover, .path a:hover, .calendar-links a:hover, .join-action:hover { background-size: 0 1px; }
+  .nav ul a:not([aria-current="page"]):hover::after { transform: scaleX(0); }
+  .nav ul a:hover { color: var(--silver); }
+}
