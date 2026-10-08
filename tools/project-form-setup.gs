@@ -16,6 +16,8 @@
  *      file upload questions, so this one is manual.)
  *   4. Back here, choose finishSetup and click Run.
  *   5. Follow the last steps printed in the log: publish the Public tab as CSV and send the links.
+ *   6. Choose installAutoShare and click Run, so uploaded screenshots can show on the site.
+ *      (shareUploadsNow fixes any screenshots that were uploaded before this was on.)
  */
 
 const FORM_TITLE = 'Cedar Ridge CS Club: Add Your Project';
@@ -166,6 +168,42 @@ function finishSetup() {
   Logger.log('  B) Send the club these two links for data/config.js:');
   Logger.log('     projectsFormURL:  ' + form.getPublishedUrl());
   Logger.log('     projectsSheetCSV: (the link from step A)');
+}
+
+// Makes every uploaded screenshot viewable by anyone with the link, so the website can show it.
+// Uploaded files don't always pick up the folder's sharing, so this sets it on each file.
+function shareUploadsNow() {
+  const formId = PropertiesService.getScriptProperties().getProperty('FORM_ID');
+  if (!formId) { Logger.log('Run createProjectForm first.'); return; }
+  const form = FormApp.openById(formId);
+  let shared = 0, failed = 0;
+  form.getResponses().forEach(r => r.getItemResponses().forEach(ir => {
+    if (ir.getItem().getType() !== FormApp.ItemType.FILE_UPLOAD) return;
+    [].concat(ir.getResponse() || []).forEach(fileId => {
+      try {
+        const file = DriveApp.getFileById(fileId);
+        if (file.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK) {
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        }
+        shared++;
+      } catch (err) { failed++; Logger.log('Could not share file ' + fileId + ': ' + err); }
+    });
+  }));
+  Logger.log(shared + ' screenshot(s) are viewable by link' + (failed ? ', ' + failed + ' failed (see above).' : '.'));
+}
+
+// Run once: from now on, each new submission's screenshot is shared automatically.
+function installAutoShare() {
+  const formId = PropertiesService.getScriptProperties().getProperty('FORM_ID');
+  if (!formId) { Logger.log('Run createProjectForm first.'); return; }
+  const exists = ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === 'onProjectSubmit');
+  if (!exists) ScriptApp.newTrigger('onProjectSubmit').forForm(FormApp.openById(formId)).onFormSubmit().create();
+  shareUploadsNow();
+  Logger.log(exists ? 'Auto-sharing was already on.' : 'Auto-sharing is on: new screenshots will be shared as they come in.');
+}
+
+function onProjectSubmit(e) {
+  shareUploadsNow();
 }
 
 // Clears what this script remembers, so createProjectForm can run again. Doesn't delete any files.

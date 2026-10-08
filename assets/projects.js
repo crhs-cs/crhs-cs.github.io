@@ -16,11 +16,13 @@
     if (/^\/[^/]/.test(u)) return u;
     return '';
   };
-  // Google Drive share links don't display as images; turn them into Drive's image thumbnail link.
-  const imageUrl = u => {
+  // Google Drive share links (what form uploads produce) don't display as images directly.
+  // Use Drive's image server, with its thumbnail endpoint as a backup. Both need the file to be
+  // shared as "Anyone with the link"; if neither loads, the card shows the generated cover.
+  const imageSources = u => {
     u = safeUrl(u);
-    const m = u.match(/drive\.google\.com\/(?:open\?id=|file\/d\/|uc\?(?:export=\w+&)?id=)([\w-]{10,})/);
-    return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1600` : u;
+    const m = u.match(/drive\.google\.com\/(?:open\?id=|file\/d\/|uc\?(?:export=\w+&)?id=|thumbnail\?id=)([\w-]{10,})/);
+    return m ? [`https://lh3.googleusercontent.com/d/${m[1]}=w1600`, `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1600`] : (u ? [u] : []);
   };
   const slugify = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').replace(/-+/g, '-').slice(0, 60) || 'project';
   const parseDate = s => {
@@ -102,7 +104,7 @@
       summary: String(p.summary || p.description || '').trim().split('\n')[0].slice(0, 140),
       description: String(p.description || p.summary || '').trim(),
       tags: cleanTags(p.tags),
-      image: imageUrl(p.image),
+      images: imageSources(p.image),
       code: safeUrl(p.code || p.link),
       demo: safeUrl(p.demo),
       slides: safeUrl(p.slides),
@@ -142,9 +144,17 @@
       <span class="cover-title">${esc(p.title)}</span>
     </div>`;
   }
-  const media = p => p.image
-    ? `<img src="${esc(p.image)}" alt="Screenshot of ${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'cover-fallback'}))">`
-    : cover(p);
+  const media = p => `<div class="media-stack">${cover(p)}${p.images.length
+    ? `<img class="pimg" src="${esc(p.images[0])}" data-backup="${esc(p.images.slice(1).join(' '))}" alt="Screenshot of ${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer">`
+    : ''}</div>`;
+  // If a screenshot fails, try its backup address, then fall back to the cover underneath.
+  document.addEventListener('error', e => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement) || !img.classList.contains('pimg')) return;
+    const rest = (img.dataset.backup || '').split(' ').filter(Boolean);
+    if (rest.length) { img.dataset.backup = rest.slice(1).join(' '); img.src = rest[0]; }
+    else img.remove();
+  }, true);
   const viewUrl = p => `/projects/view/?id=${encodeURIComponent(p.id)}`;
   const sampleChip = p => p.sample ? '<span class="chip">Sample</span>' : '';
 
@@ -201,9 +211,10 @@
     const id = new URLSearchParams(location.search).get('id') || '';
     const p = projects.find(x => x.id === id);
     if (!p) {
-      el.innerHTML = `<div class="page-head"><h1>Project not found</h1><p class="lede">This link may be out of date. <a href="/projects/">See all projects</a>.</p></div>`;
+      el.innerHTML = `<div class="page-head project-head"><a class="back" href="/projects/">All projects</a><h1>Project not found</h1>
+        <p class="lede">If this project was just approved, it can take up to 5 minutes to appear. Otherwise the link may be out of date.</p></div>`;
       document.title = 'Project not found | Cedar Ridge CS Club';
-      return;
+      return false;
     }
     document.title = `${p.title} | Cedar Ridge CS Club`;
     const links = [['Code', p.code], ['Try it', p.demo], ['Slides', p.slides]].filter(([, u]) => u);
@@ -231,9 +242,19 @@
   const grids = document.querySelectorAll('[data-projects-grid]');
   const view = document.querySelector('[data-project-view]');
   if (!grids.length && !view) return;
-  loadProjects().then(projects => {
+  // Google refreshes published sheets every few minutes and its servers don't all update at once,
+  // so a just-approved project can briefly be missing. The project page retries before giving up.
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  (async () => {
+    let projects = await loadProjects();
     grids.forEach(el => renderGrid(el, projects));
-    if (view) renderView(view, projects);
     document.querySelectorAll('[data-projects-sample-note]').forEach(n => { n.hidden = !projects.some(p => p.sample); });
-  });
+    if (!view) return;
+    const id = new URLSearchParams(location.search).get('id') || '';
+    for (let tries = 0; tries < 2 && !projects.some(p => p.id === id) && (window.CLUB_CONFIG || {}).projectsSheetCSV; tries++) {
+      await wait(2500);
+      projects = await loadProjects();
+    }
+    renderView(view, projects);
+  })();
 })();
