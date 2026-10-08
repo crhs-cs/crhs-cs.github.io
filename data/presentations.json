@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "title": "Pipeline test",
+    "presenter": "Claude",
+    "date": "2026-10-08",
+    "file": "2026-10-08 Pipeline test (Claude).pdf",
+    "kind": "pdf",
+    "slides": "/presentations/slides/2026-10-08%20Pipeline%20test%20%28Claude%29.pdf",
+    "download": "/presentations/slides/2026-10-08%20Pipeline%20test%20%28Claude%29.pdf",
+    "thumb": "/presentations/thumbs/2026-10-08-pipeline-test-claude-bec1c259.jpg",
+    "sha256": "bec1c2591839bbb98ae5f484fe71cb280f21594a086ab430cfc4e0d3f8cac315"
+  }
+]
