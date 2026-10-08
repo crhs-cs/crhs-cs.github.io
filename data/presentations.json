@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "title": "CS Interest Meeting",
+    "presenter": "Rishi B., James H., Ian M.",
+    "date": "2026-09-02",
+    "file": "2026-9-2 CS Interest Meeting (Rishi B., James H., Ian M.).pdf",
+    "kind": "pdf",
+    "slides": "/presentations/slides/2026-9-2%20CS%20Interest%20Meeting%20%28Rishi%20B.%2C%20James%20H.%2C%20Ian%20M.%29.pdf",
+    "download": "/presentations/slides/2026-9-2%20CS%20Interest%20Meeting%20%28Rishi%20B.%2C%20James%20H.%2C%20Ian%20M.%29.pdf",
+    "thumb": "/presentations/thumbs/2026-9-2-cs-interest-meeting-rishi-b-james-h-ian-m-bc4b3ae1.jpg",
+    "sha256": "bc4b3ae1ef13aefd4bfff1bf7498f620a8049ffd4044635c79eab03293241f08"
+  }
+]
