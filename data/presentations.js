@@ -12,7 +12,7 @@
 //   slides:      link to the slides. For Google Slides, set sharing to
 //                "Anyone with the link can view" first, or visitors outside RRISD can't open it.
 //
-// The sample block hides itself once real slides are added, so it can stay or be deleted.
+// The sample block (sample: true) is an example of the format. The site never shows it.
 
 window.CLUB_PRESENTATIONS = [
   {

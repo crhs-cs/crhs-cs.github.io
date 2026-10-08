@@ -18,7 +18,7 @@
 //   demo:        live version people can try
 //   slides:      presentation slides, if any
 //
-// The three sample blocks below are marked sample: true. Delete them once real projects are added.
+// The sample blocks below (sample: true) are examples of the format. The site never shows them.
 
 window.CLUB_PROJECTS = [
   {

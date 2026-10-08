@@ -36,63 +36,72 @@
           <span class="line">Science Club</span>
         </h1>
       </div>
-      <div class="cue" aria-hidden="true">Scroll</div>
+      <div class="cue" aria-hidden="true"><span></span></div>
     </div>
   </section>
 
   <div class="content">
     <section class="section section-wide" id="meetings">
-      <h2>Meetings</h2>
-      <div class="section-body">
-        <p class="lede">Every meeting is on the club calendar. Most weeks, one or two members present a project they've been working on.</p>
-        <div class="calendar-wrap">
-          <div class="calendar-inner">
-            <div class="calendar-frame">
-              <iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=1&amp;ctz=America%2FChicago&amp;mode=AGENDA&amp;showTitle=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;color=%238E24AA" title="Cedar Ridge CS Club meeting calendar" loading="lazy"></iframe>
-            </div>
-            <div class="calendar-links">
-              <a href="https://calendar.google.com/calendar/u/0?cid=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank" rel="noopener">Add to your Google Calendar</a>
-              <a href="https://calendar.google.com/calendar/embed?src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;ctz=America%2FChicago" target="_blank" rel="noopener">Open full calendar</a>
-            </div>
+      <header class="section-head"><h2>Meetings</h2></header>
+      <div class="next" data-next-meeting hidden></div>
+      <div class="calendar-wrap">
+        <div class="calendar-inner">
+          <div class="calendar-frame">
+            <iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=1&amp;ctz=America%2FChicago&amp;mode=AGENDA&amp;showTitle=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;color=%238E24AA" title="Cedar Ridge CS Club meeting calendar" loading="lazy"></iframe>
+          </div>
+          <div class="calendar-links">
+            <a href="https://calendar.google.com/calendar/u/0?cid=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank" rel="noopener">Add to your Google Calendar</a>
+            <a href="https://calendar.google.com/calendar/embed?src=NDVlMDllY2I0NTY1ZTZiOGQxNWYwZmQ3ZjQ4NTNkYjhlYzdjNGQ1OTdiZGUzZDdmYjhhZmY4NDIwODQ3YTQwZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;ctz=America%2FChicago" target="_blank" rel="noopener">Open full calendar</a>
           </div>
         </div>
       </div>
+
     </section>
 
     <section class="section section-wide" id="projects">
-      <h2>Projects</h2>
-      <div class="section-body">
-        <p class="lede">The latest projects members have demoed at meetings.</p>
-        <p class="note" data-projects-sample-note hidden>Sample entries until real projects are added.</p>
-        <div data-projects-grid data-limit="3"></div>
-        <a class="see-all" href="/projects/">See all projects</a>
+      <header class="section-head">
+        <h2>Projects</h2>
+        <a class="more" href="/projects/" data-more>All projects</a>
+      </header>
+      <div data-projects-grid data-limit="3">
+        <template>
+          <div class="invite">
+            <p>Members demo what they've built at meetings, and those projects go here. Working on something?</p>
+            <a class="button" href="/projects/submit/">Add your project</a>
+          </div>
+        </template>
       </div>
     </section>
 
     <section class="section section-wide" id="presentations">
-      <h2>Presentations</h2>
-      <div class="section-body">
-        <p class="lede">Slides from recent meetings, so you can catch up on anything you missed.</p>
-        <p class="note" data-presentations-sample-note hidden>Sample entry until real slides are added.</p>
-        <div data-presentations-grid data-limit="3"></div>
-        <a class="see-all" href="/presentations/">See all presentations</a>
-      </div>
+      <header class="section-head">
+        <h2>Presentations</h2>
+        <a class="more" href="/presentations/">All slides</a>
+      </header>
+      <div data-presentations-grid data-limit="4" data-style="rows" data-hide-when-empty></div>
     </section>
 
-    <section class="section" id="about">
-      <h2>About</h2>
-      <div class="section-body">
-        <p class="lede">We're Cedar Ridge High School's computer science club, run by students. The club came back this year after a year off. Meetings are a mix of short workshops and demo nights, where members show the club something they've built.</p>
-        <div data-list="officers"></div>
-      </div>
-    </section>
-
-    <section class="section" id="join">
-      <h2>Join</h2>
-      <div class="section-body">
-        <p class="lede">Show up to any meeting. You don't need any experience, and you don't need a project to come watch. If you want something to start on, the <a href="/resources/">resources page</a> has free places to learn.</p>
-        <a class="button" href="#meetings">See the next meeting</a>
-      </div>
+    <section class="section section-wide" id="join">
+      <header class="section-head"><h2>Join</h2></header>
+      <p class="statement">A student-run club for anyone at Cedar Ridge who wants to build things with code. You don't need any experience.</p>
+      <ol class="path">
+        <li>
+          <h3>Come to a meeting</h3>
+          <p>Any week works. You don't need a project to come watch.</p>
+          <a href="#meetings">See the next meeting</a>
+        </li>
+        <li>
+          <h3>Start learning</h3>
+          <p>Free courses and practice sites, from your first program to USACO.</p>
+          <a href="/resources/">Find a place to start</a>
+        </li>
+        <li>
+          <h3>Show what you built</h3>
+          <p>Demo it at a meeting and it goes on the projects page.</p>
+          <a href="/projects/submit/">Add your project</a>
+        </li>
+      </ol>
+      <div class="officers" data-list="officers"></div>
     </section>
   </div>
 </main>
@@ -107,6 +116,7 @@
 <script src="/data/presentations.js?v=202610080006"></script>
 <script src="/data/officers.js?v=202610080006"></script>
 <script src="/data/config.js?v=202610080006"></script>
+<script src="/assets/meetings.js"></script>
 <script src="/assets/presentations.js?v=202610080006"></script>
 <script src="/assets/projects.js?v=202610080006"></script>
 <script src="/assets/site.js?v=202610080006"></script>

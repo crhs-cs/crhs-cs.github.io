@@ -4,7 +4,8 @@
 //     (see tools/build-presentations.py)
 //   - data/presentations.js, for slides that live somewhere else (a Google Slides link, say)
 // Renders [data-presentations-grid] as cards with each deck's first slide as the thumbnail.
-// Add data-limit="3" to show only the newest few (home page).
+// Add data-limit="3" to show only the newest few, and data-style="rows" for a compact list (home page).
+// A list with no presentations hides its whole section if it has data-hide-when-empty.
 (() => {
   const grids = document.querySelectorAll('[data-presentations-grid]');
   if (!grids.length) return;
@@ -19,6 +20,7 @@
     return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null;
   };
   const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const fmtShort = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
   // A Drive file ID from a Slides, Drive or Docs link.
   const fileIdFrom = u => {
@@ -57,9 +59,9 @@
     } catch (e) { console.warn('Could not load data/presentations.json', e); }
     const byKey = new Map();
     [...uploaded, ...local].forEach(p => { if (p.title) byKey.set(p.key, p); });
-    let all = [...byKey.values()];
-    if (all.some(p => !p.sample)) all = all.filter(p => !p.sample);   // the sample disappears once real slides exist
-    return all.sort((a, b) => (b.date || 0) - (a.date || 0) || a.title.localeCompare(b.title));
+    // Sample entries are format examples for officers, never shown on the site.
+    return [...byKey.values()].filter(p => !p.sample)
+      .sort((a, b) => (b.date || 0) - (a.date || 0) || a.title.localeCompare(b.title));
   }
 
   // Generated cover, shown until (or instead of) the first-slide thumbnail.
@@ -78,7 +80,7 @@
   function card(p){
     const body = `<div class="pcard-media slide-media">${media(p)}</div>
       <div class="pcard-body">
-        <h3>${esc(p.title)}${p.sample ? '<span class="chip">Sample</span>' : ''}</h3>
+        <h3>${esc(p.title)}</h3>
         ${p.summary ? `<p>${esc(p.summary)}</p>` : ''}
         <div class="pcard-meta">${esc(p.presenter)}${p.presenter && p.date ? ' · ' : ''}${p.date ? fmt(p.date) : ''}</div>
         ${p.slides ? '<span class="pcard-go">View slides</span>' : ''}
@@ -103,12 +105,21 @@
     }, true);
   }
 
+  // Compact version for the home page: one line per deck.
+  const row = p => {
+    const inner = `<time>${p.date ? fmtShort(p.date) : ''}</time><span class="t">${esc(p.title)}</span>`
+      + `<span class="by">${esc(p.presenter)}</span>${p.slides ? '<span class="go">Slides</span>' : '<span></span>'}`;
+    return `<li>${p.slides ? `<a href="${esc(p.slides)}" target="_blank" rel="noopener">${inner}</a>` : `<div>${inner}</div>`}</li>`;
+  };
+
   load().then(items => {
     grids.forEach(el => {
       const limit = parseInt(el.dataset.limit, 10) || 0;
       const list = limit ? items.slice(0, limit) : items;
-      el.innerHTML = list.length ? `<ul class="pgrid">${list.map(card).join('')}</ul>` : '<p class="empty">No slides posted yet.</p>';
+      if (!list.length && el.hasAttribute('data-hide-when-empty')) { el.closest('section').hidden = true; return; }
+      el.innerHTML = !list.length ? '<p class="empty">No slides posted yet.</p>'
+        : el.dataset.style === 'rows' ? `<ul class="slide-rows">${list.map(row).join('')}</ul>`
+        : `<ul class="pgrid">${list.map(card).join('')}</ul>`;
     });
-    document.querySelectorAll('[data-presentations-sample-note]').forEach(n => { n.hidden = !items.some(p => p.sample); });
   });
 })();

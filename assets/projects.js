@@ -124,7 +124,8 @@
     // A pull-request entry with the same id wins over a form entry, so an officer can correct one.
     const byId = new Map();
     [...remote, ...local].forEach(p => { if (p.title) byId.set(p.id, p); });
-    return [...byId.values()].sort((a, b) => (b.date || 0) - (a.date || 0) || a.title.localeCompare(b.title));
+    // Sample entries in data/projects.js are format examples for officers, never shown on the site.
+    return [...byId.values()].filter(p => !p.sample).sort((a, b) => (b.date || 0) - (a.date || 0) || a.title.localeCompare(b.title));
   }
 
   // ---------- pieces ----------
@@ -184,7 +185,14 @@
   function renderGrid(el, projects){
     const limit = parseInt(el.dataset.limit, 10) || 0;
     const list = limit ? projects.slice(0, limit) : projects;
-    if (!list.length) { el.innerHTML = '<p class="empty">No projects yet. The first demo night will fill this in.</p>'; return; }
+    if (!list.length) {
+      // A list can carry its own empty state in a <template>; its section's "All projects" link hides too.
+      const tpl = el.querySelector('template');
+      if (tpl) el.replaceChildren(tpl.content.cloneNode(true));
+      else el.innerHTML = '<p class="empty">No projects yet. The first demo night will fill this in.</p>';
+      el.closest('section')?.querySelectorAll('[data-more]').forEach(a => { a.hidden = true; });
+      return;
+    }
 
     const withFilter = !limit;
     const tags = [...new Set(projects.flatMap(p => p.tags))].sort((a, b) => a.localeCompare(b));
@@ -256,7 +264,6 @@
   (async () => {
     let projects = await loadProjects();
     grids.forEach(el => renderGrid(el, projects));
-    document.querySelectorAll('[data-projects-sample-note]').forEach(n => { n.hidden = !projects.some(p => p.sample); });
     if (!view) return;
     const id = new URLSearchParams(location.search).get('id') || '';
     for (let tries = 0; tries < 2 && !projects.some(p => p.id === id) && (window.CLUB_CONFIG || {}).projectsSheetCSV; tries++) {

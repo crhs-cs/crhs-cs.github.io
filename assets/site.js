@@ -132,7 +132,7 @@
     officers(el) {
       const people = window.CLUB_OFFICERS || [];
       if (!people.length) { el.hidden = true; return; }
-      el.innerHTML = '<ul class="people">' + people.map(p => `<li><b>${esc(p.name)}</b><span>${esc(p.role)}</span></li>`).join('') + '</ul>';
+      el.innerHTML = '<h3>Officers</h3><ul class="people">' + people.map(p => `<li><b>${esc(p.name)}</b><span>${esc(p.role)}</span></li>`).join('') + '</ul>';
     },
   };
 
