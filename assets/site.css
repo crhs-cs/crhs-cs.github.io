@@ -714,16 +714,18 @@ footer a:hover { color: var(--lavender); }
 /* site.js adds .reveal to <html> only when it can animate, and .in to each section as you scroll to it.
    Every section moves differently so the page doesn't repeat itself:
    Meetings: the date rises out of its baseline, the list slides in from the right.
-   Projects: the title wipes in, cards rise and grow into place.
-   Presentations: rows slide in from the left.
-   About: the statement sharpens out of a blur, the three steps follow quickly.
+   Projects: the title wipes in from the left, cards rise and grow into place.
+   Presentations: the title drops in from above, rows slide in from the left.
+   About: the title opens out from its center, the statement sharpens out of a blur, the steps follow quickly.
    Join: the info tiles tip forward into place. */
 :root { --ease-out: cubic-bezier(0.2, 0.75, 0.15, 1); }
 .reveal .section:not(.in) :is(.section-head > *, .next-main > *, .next-after li, .calendar-wrap, .pcard,
   .slide-rows li, .invite, .statement, .path li, .join-grid li) { opacity: 0; }
 
-.reveal :is(#meetings, #presentations, #join).in .section-head h2 { animation: rise 0.7s var(--ease-out) both; }
-.reveal :is(#projects, #about).in .section-head h2 { animation: wipe 0.8s var(--ease-out) both; }
+.reveal :is(#meetings, #join).in .section-head h2 { animation: rise 0.7s var(--ease-out) both; }
+.reveal #projects.in .section-head h2 { animation: wipe 0.8s var(--ease-out) both; }
+.reveal #presentations.in .section-head h2 { animation: drop 0.7s var(--ease-out) both; }
+.reveal #about.in .section-head h2 { animation: open 0.8s var(--ease-out) both; }
 .reveal .section.in .section-head .more { animation: fade 0.5s ease 0.3s both; }
 
 .reveal #meetings.in .next-label { animation: lift 0.55s var(--ease-out) 0.05s both; }
@@ -748,6 +750,8 @@ footer a:hover { color: var(--lavender); }
 .reveal :is(.next-after li, .pcard, .slide-rows li, .path li, .join-grid li):nth-child(4) { --i: 3; }
 
 @keyframes rise { from { clip-path: inset(0 0 100% 0); transform: translateY(0.35em); } to { clip-path: inset(0 0 -0.2em 0); transform: none; } }
+@keyframes drop { from { clip-path: inset(100% 0 -0.2em 0); transform: translateY(-0.35em); } to { clip-path: inset(0 0 -0.2em 0); transform: none; } }
+@keyframes open { from { clip-path: inset(0 50% -0.2em 50%); letter-spacing: 0.08em; } to { clip-path: inset(0 0 -0.2em 0); letter-spacing: normal; } }
 @keyframes wipe { from { clip-path: inset(0 100% -0.2em 0); } to { clip-path: inset(0 0 -0.2em 0); } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes lift { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
