@@ -2,6 +2,11 @@
 // A fragment shader traces light rays bending around a black hole (a simplified Schwarzschild
 // geodesic) and shades the accretion disk they cross. Scrolling moves the camera toward it.
 (() => {
+  // "Pull": while you scroll, the view lunges toward the black hole, the space around it streams
+  // outward and twists slightly, and the edges darken, then it eases back when you stop. The title
+  // is dragged toward the hole as it fades. Set to 0 to turn all of that off (the dive is unchanged).
+  const PULL = 1;
+
   const canvas = document.getElementById('sky');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' });
@@ -18,6 +23,8 @@ uniform float uShift;
 uniform float uSteps;
 uniform float uFade;
 uniform float uFocal;
+uniform float uPull;   // 0..1, how fast you're scrolling (smoothed)
+uniform float uDepth;  // 0..1, how far into the dive
 
 float hash(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 float noise(vec2 p){
@@ -47,6 +54,11 @@ float diskTex(vec2 xz, float r){
 void main(){
   vec2 uv = (gl_FragCoord.xy - 0.5*uRes) / uRes.y;
   uv.x -= uShift;
+  // Pulled in: everything streams outward from the hole like you're rushing at it (the screen's
+  // edges show sky from nearer the center), with a slight twist around it.
+  float r2 = dot(uv, uv);
+  uv /= 1.0 + (uPull*0.55 + uDepth*0.1) * r2;
+  uv = rot(uv, (uPull*0.3 + uDepth*0.1) * exp(-r2*2.5));
 
   float yaw = 0.0;
   vec3 ro = uDist * vec3(cos(uElev)*sin(yaw), sin(uElev), cos(uElev)*cos(yaw));
@@ -54,7 +66,7 @@ void main(){
   vec3 upW = normalize(vec3(0.12, 1.0, 0.0));
   vec3 rt = normalize(cross(fw, upW));
   vec3 up = cross(rt, fw);
-  vec3 rd = normalize(fw*uFocal + uv.x*rt + uv.y*up);
+  vec3 rd = normalize(fw*uFocal*(1.0 + 0.18*uPull) + uv.x*rt + uv.y*up);
 
   vec3 p = ro, v = rd;
   vec3 hv = cross(p, v);
@@ -110,7 +122,7 @@ void main(){
 
   col = 1.0 - exp(-col * 1.25);
   vec2 q = gl_FragCoord.xy / uRes;
-  col *= 0.55 + 0.45*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.22);
+  col *= (0.55 - 0.3*uPull) + (0.45 + 0.3*uPull)*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.22 + 0.45*uPull);
   col *= uFade;
   gl_FragColor = vec4(col, 1.0);
 }`;
@@ -137,7 +149,7 @@ void main(){
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uTime', 'uDist', 'uElev', 'uShift', 'uSteps', 'uFade', 'uFocal'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+  ['uRes', 'uTime', 'uDist', 'uElev', 'uShift', 'uSteps', 'uFade', 'uFocal', 'uPull', 'uDepth'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
 
   const small = Math.min(window.innerWidth, window.innerHeight) < 700;
   const quality = small ? 0.45 : 0.6;
@@ -172,7 +184,7 @@ void main(){
   const smooth = t => t * t * (3 - 2 * t);
   const clamp01 = x => Math.max(0, Math.min(1, x));
 
-  let target = 0, cur = 0;
+  let target = 0, cur = 0, pull = 0;
   function readScroll(){
     const span = hero.offsetHeight - window.innerHeight;
     target = span > 0 ? clamp01(window.scrollY / span) : 0;
@@ -184,8 +196,12 @@ void main(){
     if (reduce) return;
     const o1 = desktop ? 1 - clamp01((s - 0.04) / 0.2) : 1 - clamp01((s - 0.1) / 0.3);
     [o1].forEach((o, i) => {
+      const k = 1 - o;
       beats[i].style.opacity = o.toFixed(3);
-      beats[i].style.transform = `translateY(${((1 - o) * 24).toFixed(1)}px)`;
+      // With the pull on, the title is dragged up and right toward the hole and shrinks as it fades.
+      beats[i].style.transform = PULL
+        ? `translate(${(k * 70).toFixed(1)}px, ${(-k * 46).toFixed(1)}px) scale(${(1 - 0.16 * k).toFixed(3)})`
+        : `translateY(${(k * 24).toFixed(1)}px)`;
     });
     if (cue) cue.style.opacity = (1 - clamp01(s / 0.06)).toFixed(3);
   }
@@ -193,6 +209,9 @@ void main(){
   const start = performance.now();
   const frozenTime = 9.0;
   function frame(now){
+    // How far the camera still has to catch up is a measure of scroll speed; ease it so it swells and settles.
+    const speed = Math.min(1, Math.abs(target - cur) * 9);
+    pull += (speed - pull) * (speed > pull ? 0.18 : 0.06);
     cur += (target - cur) * 0.12;
     const s = reduce ? 0.35 : cur;
     updateText(s);
@@ -216,6 +235,8 @@ void main(){
       const halfDiag = Math.hypot(0.5 * wide, 0.5);
       const lens = Math.min(2.4, Math.max(1, halfDiag / 0.56));
       gl.uniform1f(U.uFocal, 1.5 * (1 + (lens - 1) * e * e));
+      gl.uniform1f(U.uPull, reduce ? 0 : PULL * pull);
+      gl.uniform1f(U.uDepth, reduce ? 0 : PULL * e);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
     if (!reduce) requestAnimationFrame(frame);
