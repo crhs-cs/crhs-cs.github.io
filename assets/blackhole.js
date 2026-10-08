@@ -2,11 +2,6 @@
 // A fragment shader traces light rays bending around a black hole (a simplified Schwarzschild
 // geodesic) and shades the accretion disk they cross. Scrolling moves the camera toward it.
 (() => {
-  // "Pull": while you scroll, the camera surges toward the black hole (the ray tracing renders the
-  // closer view for real, so the lensing changes the way it physically would) and the edges darken,
-  // then it eases back when you stop. Set to 0 to turn it off (the dive is unchanged).
-  const PULL = 1;
-
   const canvas = document.getElementById('sky');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' });
@@ -23,7 +18,6 @@ uniform float uShift;
 uniform float uSteps;
 uniform float uFade;
 uniform float uFocal;
-uniform float uPull;   // 0..1, how fast you're scrolling (smoothed); darkens the edges
 
 float hash(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 float noise(vec2 p){
@@ -116,7 +110,7 @@ void main(){
 
   col = 1.0 - exp(-col * 1.25);
   vec2 q = gl_FragCoord.xy / uRes;
-  col *= (0.55 - 0.3*uPull) + (0.45 + 0.3*uPull)*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.22 + 0.45*uPull);
+  col *= 0.55 + 0.45*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.22);
   col *= uFade;
   gl_FragColor = vec4(col, 1.0);
 }`;
@@ -143,7 +137,7 @@ void main(){
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['uRes', 'uTime', 'uDist', 'uElev', 'uShift', 'uSteps', 'uFade', 'uFocal', 'uPull'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+  ['uRes', 'uTime', 'uDist', 'uElev', 'uShift', 'uSteps', 'uFade', 'uFocal'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
 
   const small = Math.min(window.innerWidth, window.innerHeight) < 700;
   const quality = small ? 0.45 : 0.6;
@@ -178,7 +172,7 @@ void main(){
   const smooth = t => t * t * (3 - 2 * t);
   const clamp01 = x => Math.max(0, Math.min(1, x));
 
-  let target = 0, cur = 0, pull = 0;
+  let target = 0, cur = 0;
   function readScroll(){
     const span = hero.offsetHeight - window.innerHeight;
     target = span > 0 ? clamp01(window.scrollY / span) : 0;
@@ -199,9 +193,6 @@ void main(){
   const start = performance.now();
   const frozenTime = 9.0;
   function frame(now){
-    // How far the camera still has to catch up is a measure of scroll speed; ease it so it swells and settles.
-    const speed = Math.min(1, Math.abs(target - cur) * 9);
-    pull += (speed - pull) * (speed > pull ? 0.18 : 0.06);
     cur += (target - cur) * 0.12;
     const s = reduce ? 0.35 : cur;
     updateText(s);
@@ -214,8 +205,7 @@ void main(){
       const wide = canvas.width / canvas.height;
       gl.uniform2f(U.uRes, canvas.width, canvas.height);
       gl.uniform1f(U.uTime, reduce ? frozenTime : (now - start) / 1000);
-      // The surge: up to 14% closer while scrolling fast, proportionally, so it's safe deep in the dive too.
-      gl.uniform1f(U.uDist, (20.0 - 15.2 * e) * (1 - (reduce ? 0 : PULL * 0.14 * pull)));
+      gl.uniform1f(U.uDist, 20.0 - 15.2 * e);
       gl.uniform1f(U.uElev, 0.2 - 0.13 * e);
       gl.uniform1f(U.uShift, wide > 1.1 ? (0.22 * (1 - e)) : 0.0);
       gl.uniform1f(U.uSteps, steps);
@@ -226,7 +216,6 @@ void main(){
       const halfDiag = Math.hypot(0.5 * wide, 0.5);
       const lens = Math.min(2.4, Math.max(1, halfDiag / 0.56));
       gl.uniform1f(U.uFocal, 1.5 * (1 + (lens - 1) * e * e));
-      gl.uniform1f(U.uPull, reduce ? 0 : PULL * pull);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
     if (!reduce) requestAnimationFrame(frame);
