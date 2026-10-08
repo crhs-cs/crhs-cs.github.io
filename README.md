@@ -28,6 +28,10 @@ Projects come from two places, merged automatically:
    it in. The comments at the top of the file explain every field. Put a screenshot in
    `images/projects/` and point `image` at it. An officer reviews and merges.
 
+To build the form and its spreadsheet from scratch, use `tools/project-form-setup.gs`: paste it into
+a new project at script.google.com while signed in to the account that should own the form, then
+follow the steps at the top of the file.
+
 If the same project shows up in both, the `data/projects.js` version wins, so officers can fix a form
 entry by adding a corrected block with the same `id`.
 
