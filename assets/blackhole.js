@@ -101,7 +101,7 @@ void main(){
       if (rr > 2.2 && rr < 10.0){
         float n = diskTex(hit.xz, rr);
         float prof = smoothstep(2.2, 2.9, rr) * (1.0 - smoothstep(5.5, 10.0, rr));
-        float dens = prof * (0.42 + 0.85*smoothstep(0.15, 0.85, n));
+        float dens = prof * (0.32 + 0.9*smoothstep(0.15, 0.85, n));
         // Thin-disk temperature, peaking near the inner edge and falling off outward. (Its zero point
         // sits just inside the visible edge, so the gas hugging the shadow still glows.)
         float tEm = pow(max(1.0 - sqrt(1.8/rr), 0.0), 0.25) * pow(1.8/rr, 0.75) / 0.49;
@@ -112,10 +112,17 @@ void main(){
         float g = sqrt(1.0 - 1.0/rr) * sqrt(1.0 - beta*beta) / (1.0 - beta*dot(vel, -normalize(v)));
         g = mix(1.0, g, 0.8);
         float tObs = tEm * g;
-        vec3 c = mix(vec3(0.22, 0.04, 0.52), vec3(0.58, 0.28, 1.0), smoothstep(0.15, 0.75, tObs));
-        c = mix(c, vec3(1.0, 0.93, 1.0), smoothstep(0.8, 1.45, tObs));
-        c *= (0.25 + 2.3*pow(tObs, 2.0)) * g;
-        c += vec3(1.0, 0.92, 1.0) * smoothstep(0.68, 0.92, n) * tObs * 0.5;   // hot knots
+        // Color by temperature: deep plum (cool, outer) -> purple -> lavender -> silver-white (hottest).
+        vec3 c = mix(vec3(0.15, 0.03, 0.28), vec3(0.48, 0.15, 0.78), smoothstep(0.1, 0.6, tObs));
+        c = mix(c, vec3(0.74, 0.62, 1.0), smoothstep(0.55, 1.05, tObs));
+        c = mix(c, vec3(0.92, 0.93, 1.0), smoothstep(1.05, 1.6, tObs));
+        // Doppler tint: gas coming toward you shifts blue-violet, gas moving away shifts magenta.
+        float shift = clamp((g - 1.0) * 1.6, -1.0, 1.0);
+        c *= mix(vec3(1.0), mix(vec3(1.22, 0.74, 0.94), vec3(0.8, 0.92, 1.16), step(0.0, shift)), abs(shift)*0.85);
+        // Denser filaments run a little warmer.
+        c *= mix(vec3(1.0), vec3(1.1, 0.88, 0.98), smoothstep(0.5, 0.9, n)*0.5);
+        c *= (0.2 + 1.9*pow(tObs, 2.0)) * g;
+        c += vec3(0.9, 0.9, 1.0) * smoothstep(0.7, 0.93, n) * tObs * 0.4;    // hot knots, silver
         float a = clamp(dens, 0.0, 1.0);
         col += (1.0 - alpha) * c * a;
         alpha += (1.0 - alpha) * a;
@@ -136,7 +143,7 @@ void main(){
     col += (1.0 - alpha) * sky;
   }
 
-  col = 1.0 - exp(-col * 1.25);
+  col = 1.0 - exp(-col * 1.1);
   vec2 q = gl_FragCoord.xy / uRes;
   col *= 0.55 + 0.45*pow(16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.22);
   col *= uFade;
