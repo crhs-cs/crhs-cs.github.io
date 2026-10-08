@@ -147,6 +147,10 @@
   const media = p => `<div class="media-stack">${cover(p)}${p.images.length
     ? `<img class="pimg" src="${esc(p.images[0])}" data-backup="${esc(p.images.slice(1).join(' '))}" alt="Screenshot of ${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer">`
     : ''}</div>`;
+  // Screenshots stay invisible until they load, so a broken image never flashes over the cover.
+  document.addEventListener('load', e => {
+    if (e.target instanceof HTMLImageElement && e.target.classList.contains('pimg')) e.target.classList.add('loaded');
+  }, true);
   // If a screenshot fails, try its backup address, then fall back to the cover underneath.
   document.addEventListener('error', e => {
     const img = e.target;

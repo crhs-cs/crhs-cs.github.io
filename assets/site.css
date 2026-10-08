@@ -496,7 +496,8 @@ footer a:hover { color: var(--lavender); }
   color: var(--silver);
 }
 .media-stack { position: relative; width: 100%; height: 100%; }
-.media-stack .pimg { position: absolute; inset: 0; }
+.media-stack .pimg { position: absolute; inset: 0; opacity: 0; transition: opacity 0.25s; }
+.media-stack .pimg.loaded { opacity: 1; }
 
 /* home page: just the newest three */
 .section [data-projects-grid] .pgrid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
