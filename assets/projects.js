@@ -148,17 +148,21 @@
     ? `<img class="pimg" src="${esc(p.images[0])}" data-backup="${esc(p.images.slice(1).join(' '))}" alt="Screenshot of ${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer">`
     : ''}</div>`;
   // Screenshots stay invisible until they load, so a broken image never flashes over the cover.
-  document.addEventListener('load', e => {
-    if (e.target instanceof HTMLImageElement && e.target.classList.contains('pimg')) e.target.classList.add('loaded');
-  }, true);
-  // If a screenshot fails, try its backup address, then fall back to the cover underneath.
-  document.addEventListener('error', e => {
-    const img = e.target;
-    if (!(img instanceof HTMLImageElement) || !img.classList.contains('pimg')) return;
-    const rest = (img.dataset.backup || '').split(' ').filter(Boolean);
-    if (rest.length) { img.dataset.backup = rest.slice(1).join(' '); img.src = rest[0]; }
-    else img.remove();
-  }, true);
+  // If one fails, try its backup address, then fall back to the cover underneath.
+  // (Shared with presentations.js; the flag keeps the handlers from being installed twice.)
+  if (!window.__clubImgHandlers) {
+    window.__clubImgHandlers = true;
+    document.addEventListener('load', e => {
+      if (e.target instanceof HTMLImageElement && e.target.classList.contains('pimg')) e.target.classList.add('loaded');
+    }, true);
+    document.addEventListener('error', e => {
+      const img = e.target;
+      if (!(img instanceof HTMLImageElement) || !img.classList.contains('pimg')) return;
+      const rest = (img.dataset.backup || '').split(' ').filter(Boolean);
+      if (rest.length) { img.dataset.backup = rest.slice(1).join(' '); img.src = rest[0]; }
+      else img.remove();
+    }, true);
+  }
   const viewUrl = p => `/projects/view/?id=${encodeURIComponent(p.id)}`;
   const sampleChip = p => p.sample ? '<span class="chip">Sample</span>' : '';
 

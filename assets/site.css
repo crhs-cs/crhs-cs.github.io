@@ -532,3 +532,10 @@ footer a:hover { color: var(--lavender); }
 .steps { margin: 0; padding-left: 1.3em; display: grid; gap: 12px; max-width: 62ch; }
 .steps li::marker { color: var(--lavender); font-weight: 600; }
 .submit-body code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.9em; color: var(--lavender); }
+
+/* ---------- presentations ---------- */
+.slide-media { aspect-ratio: 16 / 9; }
+.pcard-go { margin-top: 10px; font-size: 0.9rem; font-weight: 600; color: var(--lavender); }
+.pcard-go::after { content: "\00a0\2197"; }
+.pcard-link:hover .pcard-go { text-decoration: underline; }
+.section [data-presentations-grid] .pgrid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }

@@ -35,6 +35,14 @@ follow the steps at the top of the file.
 If the same project shows up in both, the `data/projects.js` version wins, so officers can fix a form
 entry by adding a corrected block with the same `id`.
 
+## Adding a presentation
+
+Drop the slides (Google Slides, PowerPoint or PDF) into the club's **CRHS CS Club presentations**
+Drive folder, named like `2026-10-14 Intro to Git (Rishi B.)`. A script syncs the folder into the
+spreadsheet every 15 minutes, and the site reads it, so the deck appears within about 20 minutes.
+The first slide becomes the card's thumbnail. Setup and details are in `tools/presentations-sync.gs`.
+`data/presentations.js` still works for anything that isn't in the folder.
+
 ## Editing other content
 
 Every list on the site is a file in `data/`. Open it on GitHub, click the pencil, copy an existing

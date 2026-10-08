@@ -1,6 +1,10 @@
 // Slides from club meetings. The site sorts by date, newest first.
 //
-// To add a presentation, copy one block, paste it at the top of the list, and fill it in:
+// Usually you don't need this file: drop the slides into the club's presentations Drive folder
+// and they show up on their own (see tools/presentations-sync.gs). Use this file for anything
+// that isn't in that folder.
+//
+// To add a presentation here, copy one block, paste it at the top of the list, and fill it in:
 //   title:       what the meeting covered
 //   description: one short line (optional)
 //   presenter:   first name(s) only
