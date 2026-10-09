@@ -274,7 +274,7 @@
       this.cx = R.x0 + rw / 2; this.cy = R.y0 + rh * 0.54;
       this.a = 0.6;
     }
-    update(dt){ this.a += dt * 2; }
+    update(dt){ this.a += dt * 0.35; }
     draw(ctx){
       if (!this.ok) return;
       const { v, e, p, n, size, cx, cy } = this;
