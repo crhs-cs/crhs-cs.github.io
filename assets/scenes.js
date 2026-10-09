@@ -3,6 +3,7 @@
 //   presentations -> the Utah teapot, Martin Newell's 1975 model, as a spinning wireframe
 //   resources     -> an endless zoom into the Mandelbrot set
 //   opportunities -> the 3D Pipes screensaver
+//   Learn ->  Penguin model
 // Scenes draw in the open part of the header (right of the title on wide screens, faintly
 // across the whole header on phones) and pause whenever the header is off screen.
 (() => {
@@ -89,6 +90,175 @@
     settle(){}
   }
 
+
+  class Pi {
+    init(g) {
+      this.g = g // g is some sort  of graphics frame
+      //it has properties g.region.x1, g.region.y1, g.region.x0, g.region.y0
+      //These are the bottom right and top left corners respectively
+      //These are the faces of the penguin stl file
+      this.faces = window.TUX;
+      this.ok = !!this.faces; // This basically turns the object into a boolean
+      this.offsetX = this.g.region.x1*0.7
+      this.offsetY = this.g.region.y1/3
+      this.height = this.g.region.y1
+      this.width = this.g.region.y1 // Ensure a constant aspect raitio
+      this.theta  = 0
+      this.list = []
+      if (!this.faces) return; //so if its bad lets quit
+    }
+    update(dt) {
+      console.log("updating")
+      this.theta += dt*1
+      const cos = Math.cos(this.theta) + Math.cos(Math.PI * this.theta)
+      const sin = Math.sin(this.theta) + Math.sin(Math.PI * this.theta)
+      this.list.push([cos,sin])
+    }
+    draw(ctx) {
+      for (let i = 0; i<this.list.length; i++) {
+        const cos = this.list[i][0]
+        const sin = this.list[i][1]
+        this.drawCircle(ctx, cos, sin, 1)
+      }
+    }
+    drawCircle(ctx, x0, y0, r) {
+      ctx.strokeStyle = "white"
+      ctx.lineWidth = 10;
+      x0 = ((x0+2)/4)*this.width/2 + this.offsetX
+      y0 = this.height/2 - (((y0+2)/4)*this.height/2) + this.offsetY
+      ctx.beginPath()
+      ctx.arc(x0, y0, r, 0, 2 * Math.PI)
+      ctx.fillStyle="white"
+      ctx.fill()
+    }
+  }
+
+
+  // hello I am going to add linux man spinning tux here
+  class Tux {
+    init(g) {
+      this.g = g // g is some sort  of graphics frame
+      //it has properties g.region.x1, g.region.y1, g.region.x0, g.region.y0
+      //These are the bottom right and top left corners respectively
+      //These are the faces of the penguin stl file
+      this.faces = window.TUX;
+      this.ok = !!this.faces; // This basically turns the object into a boolean
+      this.offsetX = this.g.region.x1*0.7
+      this.offsetY = this.g.region.y1/3
+      this.height = this.g.region.y1
+      this.width = this.g.region.y1 // Ensure a constant aspect raitio
+      this.theta  = 0
+      if (!this.faces) return; //so if its bad lets quit
+    }
+    update(dt) {
+      console.log("updating")
+      this.theta += dt*10
+    }
+    draw(ctx) {
+      ctx.font = "40px Arial"
+      ctx.fillStyle = "#FFFFFF"
+      const zOffset = 3.25
+      const yOffset = -0.75
+      //let lines = [
+      //  [-1,-1,5],
+      //  [1,-1,5],
+      //  [1,1,5],
+      //  [-1,1,5],
+      //  [-1,-1,6],
+      //  [1,-1,6],
+      //  [1,1,6],
+      //  [-1,1,6],
+      //]
+      //for (let i = 0; i < lines.length; i++) {
+      //  let v0 = this.project(lines[i][0], lines[i][1], lines[i][2], 120)
+      //  console.log(v0)
+      //  let v1 = this.project(lines[(i+1)%lines.length][0], lines[(i+1)%lines.length][1], lines[(i+1)%lines.length][2], 120)
+      //  this.drawLine(ctx, v0[0], v0[1], v1[0], v1[1])
+      //  console.log("xo: " + v0[0] )
+      //}
+      //
+      //This is our  litlet zoom in animation
+      let fov  =  45
+      if (this.theta < 45) {
+        fov = 45 / (1 + Math.pow(Math.E,-0.5*(this.theta-15)));
+      } else {
+        fov = 45
+      }
+      //We iterate through each face, then for each combination of 2 verticies in a triangle
+      //We draw a line for that
+      //Applying rotation matrices and transformations to make it look not butt
+      for (let i = 0; i < this.faces.length; i++) {
+        for (let j = 0; j < this.faces[i].length; j++) {
+          let v0 = [this.faces[i][j][0], this.faces[i][j][1], this.faces[i][j][2]]
+          let v1 = [this.faces[i][(j+1)%this.faces[i].length][0], this.faces[i][(j+1)%this.faces[i].length][1], this.faces[i][(j+1)%this.faces[i].length][2]]
+          v0 = this.rotateXZ(v0[0], v0[1],  v0[2], 180)
+          v0 = this.rotateXY(v0[0], v0[1],  v0[2], this.theta)
+          v0 = this.rotateYZ(v0[0], v0[1],  v0[2], 90)
+          v0 = this.project(v0[0], v0[1] + yOffset, v0[2] + zOffset, fov)
+          console.log(v0)
+          v1 = this.rotateXZ(v1[0], v1[1],  v1[2], 180)
+          v1 = this.rotateXY(v1[0], v1[1],  v1[2], this.theta)
+          v1 = this.rotateYZ(v1[0], v1[1],  v1[2], 90)
+          v1 = this.project(v1[0], v1[1] + yOffset, v1[2] + zOffset, fov)
+          this.drawLine(ctx, v0[0], v0[1], v1[0], v1[1])
+        }
+      }
+    }
+    drawLine(ctx, x0, y0, x1, y1) {
+      ctx.strokeStyle = "white"
+      ctx.lineWidth = 1;
+      x0 = ((x0+1)/2)*this.width/2 + this.offsetX
+      y0 = this.height/2 - (((y0+1)/2)*this.height/2) + this.offsetY
+      x1 = ((x1+1)/2)*this.width/2 + this.offsetX
+      y1 = this.height/2 - (((y1+1)/2)*this.height/2) + this.offsetY
+      ctx.beginPath()
+      ctx.moveTo(x0,y0)
+      ctx.lineTo(x1,y1)
+      ctx.stroke()
+    }
+    project(x,y,z, fov) {
+      let f = 1 / Math.tan((fov * Math.PI / 180)/2);
+      console.log("f: " + f)
+      return [f  * x / z, f * y/ z];
+    }
+    
+    rotateXZ(x, y, z, theta) {
+      let rad = theta * Math.PI / 180;
+      let cos = Math.cos(rad);
+      let sin = Math.sin(rad);
+    
+      let nextX = x * cos - z * sin;
+      let nextZ = x * sin + z * cos;
+    
+      return [nextX, y, nextZ];
+    }
+    
+    rotateXY(x, y, z, theta) {
+      let rad = theta * Math.PI / 180;
+      let cos = Math.cos(rad);
+      let sin = Math.sin(rad);
+    
+      let nextX = x * cos - y * sin;
+      let nextY = x * sin + y * cos;
+    
+      return [nextX, nextY, z];
+    }
+    
+    rotateYZ(x, y, z, theta) {
+      let rad = theta * Math.PI / 180;
+      let cos = Math.cos(rad);
+      let sin = Math.sin(rad);
+    
+      let nextY = y * cos - z * sin;
+      let nextZ = y * sin + z * cos;
+    
+      return [x, nextY, nextZ];
+    }
+  }
+
+
+  //claude made  its variable names so bad and this code is lowkey unreadable
+  //Maybe I just suuck
   // ---------- Utah teapot wireframe ----------
   class Teapot {
     init(g){
@@ -104,7 +274,7 @@
       this.cx = R.x0 + rw / 2; this.cy = R.y0 + rh * 0.54;
       this.a = 0.6;
     }
-    update(dt){ this.a += dt * 0.35; }
+    update(dt){ this.a += dt * 2; }
     draw(ctx){
       if (!this.ok) return;
       const { v, e, p, n, size, cx, cy } = this;
@@ -309,7 +479,7 @@ void main(){
     settle(){ for (let k = 0; k < 120; k++) this.update(0.11); this.segs.forEach(s => s.grow = 1); }
   }
 
-  const SCENES = { projects: Donut, presentations: Teapot, resources: Mandelbrot, opportunities: Pipes };
+  const SCENES = { projects: Donut, presentations: Teapot, resources: Mandelbrot, opportunities: Pipes, learn: Tux, about: Pi};
 
   function setup(canvas){
     const Scene = SCENES[canvas.dataset.scene];
