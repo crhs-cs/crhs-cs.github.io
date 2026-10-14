@@ -670,6 +670,9 @@ footer a:hover { color: var(--lavender); }
 .path h3 { margin: 0; font-size: var(--step-1); font-weight: 600; color: var(--silver); }
 .path p { margin: 0; color: var(--dim); }
 .path a { align-self: flex-start; margin-top: auto; padding-top: 12px; font-weight: 600; text-decoration: none; }
+.about-more { margin: 18px 0 0; max-width: 60ch; color: var(--dim); font-size: var(--step-1); }
+.reveal #about.in .about-more { animation: focus 0.8s var(--ease-out) 0.2s both; }
+.reveal .section:not(.in) .about-more { opacity: 0; }
 .officers:not([hidden]) { margin-top: clamp(32px, 5vw, 56px); }
 .officers h3 { margin: 0 0 12px; font-size: 0.95rem; font-weight: 500; color: var(--dim); }
 

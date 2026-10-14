@@ -3,7 +3,7 @@
 //   presentations -> the Utah teapot, Martin Newell's 1975 model, as a spinning wireframe
 //   resources     -> an endless zoom into the Mandelbrot set
 //   opportunities -> the 3D Pipes screensaver
-//   Learn ->  Penguin model
+//   learn         -> Tux, the Linux penguin, as a spinning wireframe (model converted by ImJqm)
 // Scenes draw in the open part of the header (right of the title on wide screens, faintly
 // across the whole header on phones) and pause whenever the header is off screen.
 (() => {
@@ -91,171 +91,91 @@
   }
 
 
-  class Pi {
-    init(g) {
-      this.g = g // g is some sort  of graphics frame
-      //it has properties g.region.x1, g.region.y1, g.region.x0, g.region.y0
-      //These are the bottom right and top left corners respectively
-      //These are the faces of the penguin stl file
-      this.faces = window.TUX;
-      this.ok = !!this.faces; // This basically turns the object into a boolean
-      this.offsetX = this.g.region.x1*0.7
-      this.offsetY = this.g.region.y1/3
-      this.height = this.g.region.y1
-      this.width = this.g.region.y1 // Ensure a constant aspect raitio
-      this.theta  = 0
-      this.list = []
-      if (!this.faces) return; //so if its bad lets quit
-    }
-    update(dt) {
-      console.log("updating")
-      this.theta += dt*1
-      const cos = Math.cos(this.theta) + Math.cos(Math.PI * this.theta)
-      const sin = Math.sin(this.theta) + Math.sin(Math.PI * this.theta)
-      this.list.push([cos,sin])
-    }
-    draw(ctx) {
-      for (let i = 0; i<this.list.length; i++) {
-        const cos = this.list[i][0]
-        const sin = this.list[i][1]
-        this.drawCircle(ctx, cos, sin, 1)
-      }
-    }
-    drawCircle(ctx, x0, y0, r) {
-      ctx.strokeStyle = "white"
-      ctx.lineWidth = 10;
-      x0 = ((x0+2)/4)*this.width/2 + this.offsetX
-      y0 = this.height/2 - (((y0+2)/4)*this.height/2) + this.offsetY
-      ctx.beginPath()
-      ctx.arc(x0, y0, r, 0, 2 * Math.PI)
-      ctx.fillStyle="white"
-      ctx.fill()
-    }
-  }
 
-
-  // hello I am going to add linux man spinning tux here
+  // ---------- Tux, the Linux penguin (Learn page) ----------
+  // Wireframe of a Tux STL model, converted to triangles with ImJqm's STL reader (data/tux.js).
+  // It zooms in when the page opens, then spins.
   class Tux {
     init(g) {
-      this.g = g // g is some sort  of graphics frame
-      //it has properties g.region.x1, g.region.y1, g.region.x0, g.region.y0
-      //These are the bottom right and top left corners respectively
-      //These are the faces of the penguin stl file
+      this.g = g;
       this.faces = window.TUX;
-      this.ok = !!this.faces; // This basically turns the object into a boolean
-      this.offsetX = this.g.region.x1*0.7
-      this.offsetY = this.g.region.y1/3
-      this.height = this.g.region.y1
-      this.width = this.g.region.y1 // Ensure a constant aspect raitio
-      this.theta  = 0
-      if (!this.faces) return; //so if its bad lets quit
+      this.ok = !!this.faces;
+      if (!this.ok) return;
+      // Fit the penguin to the open part of the header: measure its outline at full zoom from every
+      // side it turns to, then scale and center that box inside the region with a little margin.
+      if (!this.box) {
+        const f = 1 / Math.tan((45 * Math.PI / 180) / 2);
+        let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+        for (let th = 0; th < 360; th += 30) for (const face of this.faces) for (const v of face) {
+          const [px, py] = this.project(v, th, f);
+          x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
+        }
+        this.box = { x0, x1, y0, y1 };
+      }
+      const R = g.region, rw = R.x1 - R.x0, rh = R.y1 - R.y0, B = this.box;
+      this.scale = 0.88 * Math.min(rw / (B.x1 - B.x0), rh / (B.y1 - B.y0));
+      this.cx = R.x0 + rw / 2 - (B.x0 + B.x1) / 2 * this.scale;
+      this.cy = R.y0 + rh / 2 + (B.y0 + B.y1) / 2 * this.scale;
+      this.theta = this.theta || 0;                // keep spinning through a resize instead of restarting
     }
     update(dt) {
-      console.log("updating")
-      this.theta += dt*10
+      this.theta += dt * 10;                       // degrees per second
     }
+    settle() { this.theta = 60; }                  // reduced motion: one still frame, past the zoom-in
     draw(ctx) {
-      ctx.font = "40px Arial"
-      ctx.fillStyle = "#FFFFFF"
-      const zOffset = 3.25
-      const yOffset = -0.75
-      //let lines = [
-      //  [-1,-1,5],
-      //  [1,-1,5],
-      //  [1,1,5],
-      //  [-1,1,5],
-      //  [-1,-1,6],
-      //  [1,-1,6],
-      //  [1,1,6],
-      //  [-1,1,6],
-      //]
-      //for (let i = 0; i < lines.length; i++) {
-      //  let v0 = this.project(lines[i][0], lines[i][1], lines[i][2], 120)
-      //  console.log(v0)
-      //  let v1 = this.project(lines[(i+1)%lines.length][0], lines[(i+1)%lines.length][1], lines[(i+1)%lines.length][2], 120)
-      //  this.drawLine(ctx, v0[0], v0[1], v1[0], v1[1])
-      //  console.log("xo: " + v0[0] )
-      //}
-      //
-      //This is our  litlet zoom in animation
-      let fov  =  45
-      if (this.theta < 45) {
-        fov = 45 / (1 + Math.pow(Math.E,-0.5*(this.theta-15)));
-      } else {
-        fov = 45
+      if (!this.ok) return;
+      // Zoom in over the first few seconds (field of view eases from wide to 45 degrees)
+      const fov = this.theta < 45 ? 45 / (1 + Math.exp(-0.5 * (this.theta - 15))) : 45;
+      const f = 1 / Math.tan((fov * Math.PI / 180) / 2);
+      // Rotate and project every vertex, then draw each triangle's edges.
+      // Edges are grouped by depth so nearer lines draw brighter, in a few batched paths (like the teapot).
+      const B = 5, paths = Array.from({ length: B }, () => new Path2D());
+      const pts = [];
+      let zMin = Infinity, zMax = -Infinity;
+      for (const face of this.faces) {
+        const tri = face.map(v => {
+          const [px, py, z] = this.project(v, this.theta, f);
+          if (z < zMin) zMin = z; if (z > zMax) zMax = z;
+          return [this.cx + px * this.scale, this.cy - py * this.scale, z];
+        });
+        pts.push(tri);
       }
-      //We iterate through each face, then for each combination of 2 verticies in a triangle
-      //We draw a line for that
-      //Applying rotation matrices and transformations to make it look not butt
-      for (let i = 0; i < this.faces.length; i++) {
-        for (let j = 0; j < this.faces[i].length; j++) {
-          let v0 = [this.faces[i][j][0], this.faces[i][j][1], this.faces[i][j][2]]
-          let v1 = [this.faces[i][(j+1)%this.faces[i].length][0], this.faces[i][(j+1)%this.faces[i].length][1], this.faces[i][(j+1)%this.faces[i].length][2]]
-          v0 = this.rotateXZ(v0[0], v0[1],  v0[2], 180)
-          v0 = this.rotateXY(v0[0], v0[1],  v0[2], this.theta)
-          v0 = this.rotateYZ(v0[0], v0[1],  v0[2], 90)
-          v0 = this.project(v0[0], v0[1] + yOffset, v0[2] + zOffset, fov)
-          console.log(v0)
-          v1 = this.rotateXZ(v1[0], v1[1],  v1[2], 180)
-          v1 = this.rotateXY(v1[0], v1[1],  v1[2], this.theta)
-          v1 = this.rotateYZ(v1[0], v1[1],  v1[2], 90)
-          v1 = this.project(v1[0], v1[1] + yOffset, v1[2] + zOffset, fov)
-          this.drawLine(ctx, v0[0], v0[1], v1[0], v1[1])
+      const span = (zMax - zMin) || 1;
+      for (const tri of pts) {
+        for (let j = 0; j < tri.length; j++) {
+          const a = tri[j], b = tri[(j + 1) % tri.length];
+          const k = Math.min(B - 1, Math.floor(((a[2] + b[2]) / 2 - zMin) / span * B));
+          paths[k].moveTo(a[0], a[1]); paths[k].lineTo(b[0], b[1]);
         }
       }
-    }
-    drawLine(ctx, x0, y0, x1, y1) {
-      ctx.strokeStyle = "white"
       ctx.lineWidth = 1;
-      x0 = ((x0+1)/2)*this.width/2 + this.offsetX
-      y0 = this.height/2 - (((y0+1)/2)*this.height/2) + this.offsetY
-      x1 = ((x1+1)/2)*this.width/2 + this.offsetX
-      y1 = this.height/2 - (((y1+1)/2)*this.height/2) + this.offsetY
-      ctx.beginPath()
-      ctx.moveTo(x0,y0)
-      ctx.lineTo(x1,y1)
-      ctx.stroke()
+      for (let k = B - 1; k >= 0; k--) {
+        const t = 1 - k / (B - 1);                 // 1 = nearest
+        ctx.strokeStyle = t > 0.8 ? rgba('silver', 0.75) : rgba('lav', 0.12 + 0.55 * t);
+        ctx.stroke(paths[k]);
+      }
     }
-    project(x,y,z, fov) {
-      let f = 1 / Math.tan((fov * Math.PI / 180)/2);
-      console.log("f: " + f)
-      return [f  * x / z, f * y/ z];
+    // ImJqm's camera: turn the model upright, spin it, tip it, then perspective-project.
+    project(v, theta, f) {
+      let q = this.rotateXZ(v[0], v[1], v[2], 180);
+      q = this.rotateXY(q[0], q[1], q[2], theta);
+      q = this.rotateYZ(q[0], q[1], q[2], 90);
+      const z = q[2] + 3.25;
+      return [f * q[0] / z, f * (q[1] - 0.75) / z, z];
     }
-    
     rotateXZ(x, y, z, theta) {
-      let rad = theta * Math.PI / 180;
-      let cos = Math.cos(rad);
-      let sin = Math.sin(rad);
-    
-      let nextX = x * cos - z * sin;
-      let nextZ = x * sin + z * cos;
-    
-      return [nextX, y, nextZ];
+      const rad = theta * Math.PI / 180, cos = Math.cos(rad), sin = Math.sin(rad);
+      return [x * cos - z * sin, y, x * sin + z * cos];
     }
-    
     rotateXY(x, y, z, theta) {
-      let rad = theta * Math.PI / 180;
-      let cos = Math.cos(rad);
-      let sin = Math.sin(rad);
-    
-      let nextX = x * cos - y * sin;
-      let nextY = x * sin + y * cos;
-    
-      return [nextX, nextY, z];
+      const rad = theta * Math.PI / 180, cos = Math.cos(rad), sin = Math.sin(rad);
+      return [x * cos - y * sin, x * sin + y * cos, z];
     }
-    
     rotateYZ(x, y, z, theta) {
-      let rad = theta * Math.PI / 180;
-      let cos = Math.cos(rad);
-      let sin = Math.sin(rad);
-    
-      let nextY = y * cos - z * sin;
-      let nextZ = y * sin + z * cos;
-    
-      return [x, nextY, nextZ];
+      const rad = theta * Math.PI / 180, cos = Math.cos(rad), sin = Math.sin(rad);
+      return [x, y * cos - z * sin, y * sin + z * cos];
     }
   }
-
 
   //claude made  its variable names so bad and this code is lowkey unreadable
   //Maybe I just suuck
@@ -479,7 +399,7 @@ void main(){
     settle(){ for (let k = 0; k < 120; k++) this.update(0.11); this.segs.forEach(s => s.grow = 1); }
   }
 
-  const SCENES = { projects: Donut, presentations: Teapot, resources: Mandelbrot, opportunities: Pipes, learn: Tux, about: Pi};
+  const SCENES = { projects: Donut, presentations: Teapot, resources: Mandelbrot, opportunities: Pipes, learn: Tux };
 
   function setup(canvas){
     const Scene = SCENES[canvas.dataset.scene];
